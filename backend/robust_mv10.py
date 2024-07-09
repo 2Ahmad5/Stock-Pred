@@ -74,6 +74,7 @@ def sharpe_ratio(x, meandf, covdf, rf):
 
 def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'], short = 0, maxuse = 1, normal = 1, startdate = 199302, enddate = 202312):
     answer = []
+    datasets = []
     gridsize = 100
     try: 
         cdf = df[(df['ym'] >= startdate) & (df['ym'] <= enddate)]
@@ -248,6 +249,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             plt.show()
 
             if not short: 
+                
                 colors = ['orange', 'blue', 'green', 'red', 'purple', 'cyan', 'magenta', 'yellow']
                 colorlist = colors[:len(etflist)]
                 fig, ax = plt.subplots(figsize=(12, 6))
@@ -256,6 +258,19 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 for i, e in enumerate(allocations.columns):
                     ax.fill_between(stdlist, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
                     bottom += allocations[e]  
+            
+                for i, e in enumerate(allocations.columns):
+                    data = [{'x': efstd[j], 'y': allocations[e].iloc[j]} for j in range(len(efstd))]
+                    dataset = {
+                        'label': e,
+                        'data': data,
+
+                        'fill': True,
+                        'borderWidth': 1,
+                        'pointRadius': 4,
+                    }
+                    datasets.append(dataset)
+                # print("ooooooooooooooooooofffffffffffffffffffffffff")
                 plt.title(f'Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
                 plt.xlabel('Standard Deviation')
                 plt.ylabel('Allocation')
@@ -280,7 +295,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             simwdf = np.zeros(gridsize)
             
             # Simulation Parameters Set Up
-            Nsim = 100
+            Nsim = 300
             iter = 0
             random.seed(123)
             while iter < Nsim: 
@@ -366,7 +381,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
 
             # Create the pie chart
             answer = robw[:] 
-            print(robw, "rob oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+            # print(robw, "rob oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
             wedges, texts, autotexts = ax.pie(robw, autopct='%1.1f%%',
                 shadow=False, startangle=140)
             ax.legend(wedges, etflist, loc='upper center', bbox_to_anchor=(0.5, -0.05),
@@ -409,6 +424,19 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             for i, e in enumerate(allocations.columns):
                 ax.fill_between(efstd, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
                 bottom += allocations[e]  
+            
+            for i, e in enumerate(allocations.columns):
+                data = [{'x': efstd[j], 'y': allocations[e].iloc[j]} for j in range(len(efstd))]
+                dataset = {
+                    'label': e,
+                    'data': data,
+
+                    'fill': True,
+                    'borderWidth': 1,
+                    'pointRadius': 4,
+                }
+                datasets.append(dataset)
+            # print(datasets, 'ooooooooooooooooooooooooooooooooooooooooooooooo')
             plt.title(f'Robust Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
             plt.xlabel('Standard Deviation')
             plt.ylabel('Allocation')
@@ -425,10 +453,10 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             efpdf.index.name = '#'
             print(tabulate(efpdf, headers='keys', tablefmt='github'))
 
-        return answer
+        return answer, datasets
     except: 
         print("error")
-        return answer
+        return answer, datasets
         # mv(df, etflist, short, 0, normal, startdate, enddate)
 # %% 
 plt.rcParams['figure.figsize'] = [15, 5]
@@ -460,9 +488,13 @@ def process():
     startDate = data.get('Start', 0)
     endDate = data.get('End', 0)
     print(ticker_list, isShort, isMax, isNormal, startDate, endDate)
-    result = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
-    print(result)
-    return jsonify(result.tolist())
+    first_chart, second_chart = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
+    print(second_chart)
+    response_data = {
+        'first_chart': first_chart.tolist(),
+        'second_chart': second_chart
+    }
+    return jsonify(response_data)
 
 if __name__ == '__main__':
     app.run(debug=True)

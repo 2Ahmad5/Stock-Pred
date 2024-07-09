@@ -9,16 +9,24 @@
         Tooltip,
         Legend,
         CategoryScale,
+        LineController,
+        LineElement,
+        PointElement,
+        LinearScale,
+        Title,
+        Filler
     } from 'chart.js';
 
-    // Register required components
-    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale);
+    
+    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler);
 
     // @ts-ignore
     let userInput = '';
     let results = {};
     // @ts-ignore
-    let chart;
+    let doughnut_chart;
+    let line_chart;
+    let combo_chart;
 
     let isShort = true;
     let isMax = true;
@@ -61,8 +69,6 @@
   // Function to handle form submission
   const handleSubmit = () => {
     nothing = false;
-
-    console.log(inputValues);
     for (let key in inputValues) {
       // @ts-ignore
       if (inputValues[key].trim() !== "") {
@@ -70,11 +76,12 @@
         items = [...items, inputValues[key].trim()];
       }
     }
-    console.log(items);
+    
     inputValues = {};
   };
 
     async function processInput() {
+        console.log(items);
         try {
             const response = await axios.post('http://127.0.0.1:5000/process', {
                 ticker_list: items,
@@ -87,9 +94,22 @@
                 End: Number(`${endYear}${months[endMonth]}`)
             });
             results = response.data;
-            console.log(results);
-            updateChart(results);
-            // populateUl(results);
+            let allPoints = [];
+            results.second_chart.forEach(dataset => {
+                allPoints = allPoints.concat(dataset.data);
+            });
+
+            let xValues = allPoints.map(point => point.x);
+            let yValues = allPoints.map(point => point.y);
+
+            let minX = Math.min(...xValues);
+            let maxX = Math.max(...xValues);
+            let minY = Math.min(...yValues);
+            let maxY = Math.max(...yValues);
+
+            
+            console.log(results, minX, maxX, minY, maxY);
+            updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -97,27 +117,97 @@
     }
 
     // @ts-ignore
-    function updateChart(data) {
+    function updateChart(dough, fill, minX, maxX, minY, maxY) {
         const labels = items;
-        const dataPoints = data;
+        const dataPoints = dough;
+
         const colors = labels.map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`); // Generates random colors
+ 
+
+        const fillPoints = fill.map((dataset, i) => {
+            const color = colors[i];
+            const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; // Convert hex to rgba with 50% transparency
+            return {
+                ...dataset,
+                backgroundColor: rgbaColor,
+                borderColor: color, 
+                fill: true
+            };
+        });
 
         // @ts-ignore
         const ctx = document.querySelector('.my-chart').getContext('2d');
+        const lchartx = document.querySelector('.line-chart').getContext('2d');
+        const cchartx = document.querySelector('.combo-chart').getContext('2d');
 
-        // @ts-ignore
-        if (chart) {
-            chart.destroy();
+        
+        if (doughnut_chart) {
+            doughnut_chart.destroy();
+        }
+        if (line_chart) {
+            line_chart.destroy();
+        }
+        if (combo_chart) {
+            combo_chart.destroy();
         }
 
-        chart = new Chart(ctx, {
+        line_chart = new Chart(lchartx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: fillPoints
+               
+            },
+            options: {
+                responsive: true,
+                // pointRadius: 10,
+                fill: true,
+                borderWidth: 10,
+                borderRadius: 2,
+                hoverBorderWidth: 0,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 10
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: "linear",
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Allocation'
+                        },
+                        max: maxY,
+                        min: minY
+                    },
+                    x: {
+                        type: "linear",
+                        title: {
+                            display: true,
+                            text: 'Standard Deviation'
+                        },
+                        max: maxX,
+                        min: minX
+                    }
+                }
+            }
+        });
+
+
+        doughnut_chart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Data',
                     data: dataPoints,
-                    backgroundColor: colors // Add colors here
+                    backgroundColor: colors
                 }]
             },
             options: {
@@ -128,9 +218,9 @@
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top', // You can change the position to 'top', 'bottom', 'left', or 'right'
+                        position: 'top',
                         labels: {
-                        boxWidth: 20, // Width of the colored box in the legend
+                        boxWidth: 20,
                         padding: 10
                     }
                 }
@@ -143,11 +233,12 @@
         // Initialize chart with empty data
         // @ts-ignore
         const ctx = document.querySelector('.my-chart').getContext('2d');
-        chart = new Chart(ctx, {
-            type: 'doughnut',
+        doughnut_chart = new Chart(ctx, {
+            
             data: {
                 labels: [],
                 datasets: [{
+                    type: 'doughnut',
                     label: 'Data',
                     data: [],
                 }]
@@ -164,6 +255,45 @@
                 }
             }
         });
+
+        const lchartx = document.querySelector('.line-chart').getContext('2d');
+        line_chart = new Chart(lchartx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Data',
+                    data: [],
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        })
+
+        const cchartx = document.querySelector('.combo-chart').getContext('2d');
+        combo_chart = new Chart(cchartx, {
+            data: {
+                labels: [],
+                datasets: [{
+                    type: 'line',
+                    label: 'Data',
+                    data: [],
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+
+        })
     });
 
 </script>
@@ -251,7 +381,7 @@
             <button class="py-[10px] px-[30px] text-xl rounded-md hover:bg-[#5ce07f] ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             
         </div>
-        <div class="flex flex-col bg-[#5ce07f] h-full items-center justify-center">
+        <div class="flex flex-col rounded-bl-[15vh] bg-[#5ce07f] h-full items-center justify-center">
             <h1 class="text-4xl mb-[5vh]">Stock Doughnut Chart</h1>
             <div class="programming-stats bg-white">
                 {#if nothing}
@@ -264,6 +394,20 @@
             
         </div>
     </div>
+    {#if !nothing}
+    <div class="w-full h-[100vh] flex flex-col justify-center align-center">
+        <h1 class="text-4xl mb-[5vh] text-center">Stock Line Fill Graph</h1>
+        <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
+            <canvas class="w-[75vw] min-w-[400px] line-chart"></canvas>
+        </div>
+    </div>
+    <div class="w-full h-[100vh] flex flex-col justify-center align-center">
+        <h1 class="text-4xl mb-[5vh] text-center">Scatter Line Graph</h1>
+        <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
+            <canvas class="w-[75vw] min-w-[400px] combo-chart"></canvas>
+        </div>
+    </div>
+    {/if}
 </body>
 
 <style lang="css">
