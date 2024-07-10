@@ -14,11 +14,12 @@
         PointElement,
         LinearScale,
         Title,
-        Filler
+        Filler,
+        ScatterController
     } from 'chart.js';
 
     
-    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler);
+    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
 
     // @ts-ignore
     let userInput = '';
@@ -68,7 +69,6 @@
 
   // Function to handle form submission
   const handleSubmit = () => {
-    nothing = false;
     for (let key in inputValues) {
       // @ts-ignore
       if (inputValues[key].trim() !== "") {
@@ -83,7 +83,8 @@
     async function processInput() {
         console.log(items);
         try {
-            const response = await axios.post('http://127.0.0.1:5000/process', {
+            // const response = await axios.post('http://127.0.0.1:5000/process', {
+            await axios.post('http://127.0.0.1:5000/process', {
                 ticker_list: items,
                 Short: isShort,
                 Max: isMax,
@@ -92,24 +93,32 @@
                 Start: Number(`${startYear}${months[startMonth]}`),
                 // @ts-ignore
                 End: Number(`${endYear}${months[endMonth]}`)
-            });
-            results = response.data;
-            let allPoints = [];
-            results.second_chart.forEach(dataset => {
-                allPoints = allPoints.concat(dataset.data);
-            });
+            }).then((response ) => {
+                return new Promise((resolve, reject) => {
+                    nothing = false;
+                    resolve(response)
+                })
+            }).then((response) => {
+                results = response.data;
+                let allPoints = [];
+                results.second_chart.forEach(dataset => {
+                    allPoints = allPoints.concat(dataset.data);
+                });
 
-            let xValues = allPoints.map(point => point.x);
-            let yValues = allPoints.map(point => point.y);
+                let xValues = allPoints.map(point => point.x);
+                let yValues = allPoints.map(point => point.y);
 
-            let minX = Math.min(...xValues);
-            let maxX = Math.max(...xValues);
-            let minY = Math.min(...yValues);
-            let maxY = Math.max(...yValues);
+                let minX = Math.min(...xValues);
+                let maxX = Math.max(...xValues);
+                let minY = Math.min(...yValues);
+                let maxY = Math.max(...yValues);
 
             
-            console.log(results, minX, maxX, minY, maxY);
-            updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY);
+                console.log(results.second_chart);
+
+                updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
+            })
+            
         } catch (error) {
             console.error('Error:', error);
         }
@@ -117,16 +126,16 @@
     }
 
     // @ts-ignore
-    function updateChart(dough, fill, minX, maxX, minY, maxY) {
+    function updateChart(dough, fill, minX, maxX, minY, maxY, combo, scatter) {
         const labels = items;
         const dataPoints = dough;
-
+        const comboPoints = combo;
         const colors = labels.map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`); // Generates random colors
  
 
         const fillPoints = fill.map((dataset, i) => {
             const color = colors[i];
-            const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; // Convert hex to rgba with 50% transparency
+            const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
             return {
                 ...dataset,
                 backgroundColor: rgbaColor,
@@ -134,6 +143,26 @@
                 fill: true
             };
         });
+
+        const scatterPoints = scatter.map((dataset, i) => {
+            const color = colors[i];
+            if(i == scatter.length - 1){
+                return{
+                    ...dataset,
+                    backgroundColor: 'red',
+                    borderColor: 'red', 
+                }
+            }
+            // const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
+            return {
+                ...dataset,
+                backgroundColor: color,
+                borderColor: color, 
+               
+            };
+        });
+
+        
 
         // @ts-ignore
         const ctx = document.querySelector('.my-chart').getContext('2d');
@@ -150,6 +179,63 @@
         if (combo_chart) {
             combo_chart.destroy();
         }
+
+        combo_chart = new Chart(cchartx, {
+            data: {
+                datasets: [...comboPoints.map((points, index) => ({
+                    type: 'line',
+                    label: `Line ${index + 1}`,
+                    data: points,
+                    fill: false,
+                    borderColor: index === 0 ? 'blue' : 'red',
+                    borderWidth: 2,
+                    pointRadius: 0
+                })),
+                ...scatterPoints.map(point => ({
+                    type: 'scatter',
+                    label: point.label,
+                    data: point.data,
+                    borderWidth: point.borderWidth,
+                    pointRadius: point.pointRadius,
+                    backgroundColor: point.backgroundColor,
+                    borderColor: point.borderColor
+                }))
+            ]
+            },
+            options: {
+                responsive: true,
+                borderWidth: 10,
+                borderRadius: 2,
+                hoverBorderWidth: 0,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 10
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: "linear",
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Allocation'
+                        }
+                    },
+                    x: {
+                        type: "linear",
+                        title: {
+                            display: true,
+                            text: 'Standard Deviation'
+                        }
+                    }
+                }
+            }
+        });
 
         line_chart = new Chart(lchartx, {
             type: 'line',
