@@ -18,6 +18,8 @@
         ScatterController
     } from 'chart.js';
 
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+
     
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
 
@@ -60,15 +62,30 @@
     let startYear = '';
     let endYear = '';
     let startMonth = '';
+    
     let endMonth = '';
     /**
    * @type {any[]}
    */
     let items = [];
     let inputValues = {};
+    let desStats = [];
+    let desStats_labels = ['Mean', 'Std', 'SR'];
+    let corrStats = [];
+    let robust = [];
 
   // Function to handle form submission
   const handleSubmit = () => {
+    if (months[startMonth] >= 1 && months[startMonth] <= 9){
+        startMonth = `0${months[startMonth]}`
+    } else{
+        startMonth = `${months[startMonth]}`
+    }
+    if (months[endMonth] >= 1 && months[endMonth] <= 9){
+        endMonth = `0${months[endMonth]}`
+    } else{
+        endMonth = `${months[endMonth]}`
+    }
     for (let key in inputValues) {
       // @ts-ignore
       if (inputValues[key].trim() !== "") {
@@ -90,9 +107,9 @@
                 Max: isMax,
                 Normal: isNormal,
                 // @ts-ignore
-                Start: Number(`${startYear}${months[startMonth]}`),
+                Start: Number(`${startYear}${startMonth}`),
                 // @ts-ignore
-                End: Number(`${endYear}${months[endMonth]}`)
+                End: Number(`${endYear}${endMonth}`)
             }).then((response ) => {
                 return new Promise((resolve, reject) => {
                     nothing = false;
@@ -114,8 +131,10 @@
                 let maxY = Math.max(...yValues);
 
             
-                console.log(results.second_chart);
-
+                desStats = results.first_prints;
+                corrStats = results.second_prints;
+                robust = results.third_prints;
+                console.log(robust);
                 updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
             })
             
@@ -493,6 +512,55 @@
             <canvas class="w-[75vw] min-w-[400px] combo-chart"></canvas>
         </div>
     </div>
+
+    <div class="max-w-[90vw] ml-[5vw] mb-[15vh] mt-[15vh] grid grid-cols-2 justify-self-center justify-center align-center">
+        
+        <div>
+            <h1 class="text-center text-4xl mb-[5vh]">Asset Descriptive Statistics</h1>
+            <ul class="grid grid-cols-3 gap-[1.4vw]">
+                {#each desStats as item}
+                <li class="programming-stats w-[90%] h-[30vh] py-[6vh] px-[3vw]">
+                    {#each Object.entries(item) as [key, values]}
+                    <div class="flex flex-col justify-center align-center h-full w-full">
+                        <h2 class="text-xl text-center font-bold">{key}</h2>
+                        {#each values as value, index}
+                          <p class="text-center ">{desStats_labels[index]} - {value}</p>
+                        {/each}
+                      </div>
+                    {/each}
+                </li>
+                {/each}
+            </ul>
+        </div>
+        <div>
+            <h1 class="text-center text-4xl mb-[5vh]">Asset Correlation Matrix</h1>
+            <table class="w-[90%]">
+                <thead>
+                  <tr class="flex w-full">
+                    <th class="w-full"></th>
+                    {#each Object.keys(corrStats) as key}
+                      <th class="w-full"><p class="text-start">{key}</p></th>
+                    {/each}
+                  </tr>
+                </thead>
+                <tbody class="grid gap-[15px]">
+                  {#each Object.keys(corrStats) as rowKey}
+                    <tr class="flex w-full gap-[15px]">
+                      <th class="w-full grid items-center justify-center"><p>{rowKey}</p></th>
+                      {#each Object.keys(corrStats[rowKey]) as colKey}
+                        <td class="w-[85%] programming-stats h-[10vh] text-center shadow-xl rounded-lg grid items-center justify-center"><p class="text-lg">{corrStats[rowKey][colKey].toFixed(2)}</p></td>
+                      {/each}
+                    </tr>
+                  {/each}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="w-full flex justify-center items-center">
+        <Table>
+            
+        </Table>
+    </div>
     {/if}
 </body>
 
@@ -604,7 +672,7 @@ input[type="checkbox"]:checked::after {
         align-items: center;
         gap: 24px;
         margin: 0 auto;
-        width: fit-content;
+        /* width: fit-content; */
         box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
         border-radius: 20px;
         padding: 8px 32px;
