@@ -36,6 +36,8 @@
     let isNormal = true;
     let nothing = true;
 
+    let etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
+
     // @ts-ignore
     function handleCheckboxChange1(event) {
         isShort = !event.target.checked;
@@ -68,14 +70,45 @@
    * @type {any[]}
    */
     let items = [];
-    let inputValues = {};
+    // let inputValues = {};
+    let inputValues = Array(9).fill('');
+    let suggestions = Array(9).fill([]);
+
+    function updateSuggestions(index, value) {
+        inputValues[index] = value;
+        suggestions[index] = etflist
+        .filter(ticker => ticker.toLowerCase().includes(value.toLowerCase()))
+        .slice(0, 3);
+    }
+
+    function selectSuggestion(index, suggestion) {
+        // console.log(inputValues);
+
+        inputValues[index] = suggestion;
+        suggestions[index] = [];
+    }
+
+
     let desStats = [];
     let desStats_labels = ['Mean', 'Std', 'SR'];
     let corrStats = [];
+    /**
+   * @type {never[]}
+   */
     let robust = [];
+    function generateRange(start, end) {
+        let range = [];
+        for (let i = start; i <= end; i++) {
+        range.push(i);
+        }
+        return range;
+    }
+    let range = generateRange(1, 100);
+
 
   // Function to handle form submission
   const handleSubmit = () => {
+    // console.log(inputValues);
     if (months[startMonth] >= 1 && months[startMonth] <= 9){
         startMonth = `0${months[startMonth]}`
     } else{
@@ -86,19 +119,19 @@
     } else{
         endMonth = `${months[endMonth]}`
     }
-    for (let key in inputValues) {
+    for (let value of inputValues) {
       // @ts-ignore
-      if (inputValues[key].trim() !== "") {
+      if (value.trim() !== "") {
         // @ts-ignore
-        items = [...items, inputValues[key].trim()];
+        items = [...items, value.trim()];
       }
     }
     
-    inputValues = {};
+    inputValues = Array(9).fill('');
   };
 
     async function processInput() {
-        console.log(items);
+        // console.log(items);
         try {
             // const response = await axios.post('http://127.0.0.1:5000/process', {
             await axios.post('http://127.0.0.1:5000/process', {
@@ -135,6 +168,7 @@
                 corrStats = results.second_prints;
                 robust = results.third_prints;
                 console.log(robust);
+                // console.log(Object.keys(robust['Std']).length)
                 updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
             })
             
@@ -404,23 +438,6 @@
 </script>
 
 <body>
-    <!-- <h1>Input Values</h1>
-    <input type="text" bind:value={userInput} placeholder="Enter values separated by commas" />
-    <button on:click={processInput}>Submit</button>
-
-    <h2>Results</h2>
-    <pre>{JSON.stringify(results, null, 2)}</pre>
-
-    <h2 class="chart-heading">Stock Percents</h2>
-    <div class="programming-stats">
-        <div class="chart-container">
-            <canvas class="my-chart"></canvas>
-        </div>
-
-        <div class="details">
-            <ul></ul>
-        </div>
-    </div> -->
     <div class="main-page">
         <div class="all-inputs">
             <div>
@@ -471,7 +488,7 @@
             <div class="tickers mb-[5vh]">
                 <h2 class="text-2xl mb-[3vh]">Ticker Symbols</h2>
                 <div class="grid grid-rows-3 grid-cols-3 gap-[2vh] w-[95%]">
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[0]}>
+                    <!-- <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[0]}>
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[1]}>
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[2]}>
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[3]}>
@@ -479,7 +496,27 @@
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[5]}>
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[6]}>
                     <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[7]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[8]}>
+                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[8]}> -->
+                    {#each inputValues as inputValue, index}
+                        <div class="relative">
+                        <input
+                            class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md"
+                            type="text"
+                            placeholder="Place ticker here..."
+                            bind:value={inputValues[index]}
+                            on:input={(e) => updateSuggestions(index, e.target.value)}
+                        >
+                        {#if suggestions[index].length > 0}
+                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10">
+                            {#each suggestions[index] as suggestion}
+                                <li class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
+                                {suggestion}
+                                </li>
+                            {/each}
+                            </ul>
+                        {/if}
+                        </div>
+                    {/each}
 
                 </div>
             </div>
@@ -556,10 +593,28 @@
             </table>
         </div>
     </div>
-    <div class="w-full flex justify-center items-center">
-        <Table>
-            
-        </Table>
+    <div class="w-full flex flex-col justify-center items-center">
+        <h1 class="text-center text-4xl mb-[5vh]">Robust Efficient Frontier Portfolios</h1>
+        <div class="w-[80vw] mb-[15vh]">
+            <Table shadow>
+                <TableHead>
+                    {#each Object.keys(robust) as key}
+                        <TableHeadCell>{key}</TableHeadCell>
+                    {/each}
+                </TableHead>
+                <TableBody tableBodyClass="divide-y">
+                    {#each range as num}
+                    <TableBodyRow>
+                        {#each Object.keys(robust) as key}
+                            <TableBodyCell>{robust[key][num]}</TableBodyCell>
+                        {/each}
+                    </TableBodyRow>
+                    {/each}
+                    
+                </TableBody>
+            </Table>
+        </div>
+        
     </div>
     {/if}
 </body>
