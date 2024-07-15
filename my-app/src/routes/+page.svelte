@@ -488,15 +488,7 @@
             <div class="tickers mb-[5vh]">
                 <h2 class="text-2xl mb-[3vh]">Ticker Symbols</h2>
                 <div class="grid grid-rows-3 grid-cols-3 gap-[2vh] w-[95%]">
-                    <!-- <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[0]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[1]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[2]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[3]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[4]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[5]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[6]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[7]}>
-                    <input class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md" type="text" placeholder="Place ticker here..." bind:value={inputValues[8]}> -->
+            
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
@@ -576,7 +568,7 @@
                   <tr class="flex w-full">
                     <th class="w-full"></th>
                     {#each Object.keys(corrStats) as key}
-                      <th class="w-full"><p class="text-start">{key}</p></th>
+                      <th class="w-full"><p class="text-center mb-[3vh]">{key}</p></th>
                     {/each}
                   </tr>
                 </thead>

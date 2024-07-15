@@ -552,7 +552,7 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # maxuse = 0 (set to 0 for balanced sample)
 # normal = 0 (set to zero for resampling)
 
-# mv(df, etflist, 0, 0, 0, 201512, 202312)
+# mv(df, etflist, 1, 1, 1, 201512, 202312)
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -566,15 +566,26 @@ def process():
     endDate = data.get('End', 0)
     print(ticker_list, isShort, isMax, isNormal, startDate, endDate)
     first_chart, second_chart, third_chart, third_chart_2, first_prints, second_prints, third_prints = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
-    print(third_prints[0].to_dict())
+    if isinstance(first_chart, np.ndarray) and first_chart.size > 0:
+        first_chart = first_chart.tolist()
+    else:
+        first_chart = []
+    if isinstance(second_prints, (pd.DataFrame, pd.Series)) and not second_prints.empty:
+        second_prints_dict = second_prints.to_dict()
+    else:
+        second_prints_dict = []
+    if isinstance(third_prints, list) and third_prints and hasattr(third_prints[0], 'to_dict'):
+        third_prints_dict = third_prints[0].to_dict()
+    else:
+        third_prints_dict = []
     response_data = {
-        'first_chart': first_chart.tolist(),
+        'first_chart': first_chart,
         'second_chart': second_chart,
         'third_chart': third_chart,
         'third_chart_2': third_chart_2,
         'first_prints': first_prints,
-        'second_prints': second_prints.to_dict(),
-        'third_prints': third_prints[0].to_dict()
+        'second_prints': second_prints_dict,
+        'third_prints': third_prints_dict
     }
     return jsonify(response_data)
 
