@@ -1,8 +1,8 @@
 <script>
     //@ts-ignore
     import { onMount } from 'svelte';
-    import { openDB } from 'idb';
     import axios from 'axios';
+    import {openDB} from 'idb';
     import {
         Chart,
         DoughnutController,
@@ -17,16 +17,11 @@
         Title,
         Filler,
         ScatterController
-        Filler,
-        ScatterController
     } from 'chart.js';
 
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-
     
-    Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
 
     // @ts-ignore
@@ -41,6 +36,7 @@
     let isMax = true;
     let isNormal = true;
     let nothing = true;
+
     let csvData = []
     let etflist = []
 
@@ -113,8 +109,6 @@
         }
     }
 
-    
-
     // @ts-ignore
     function handleCheckboxChange1(event) {
         isShort = !event.target.checked;
@@ -142,7 +136,6 @@
     let endYear = '';
     let startMonth = '';
     
-    
     let endMonth = '';
     /**
    * @type {any[]}
@@ -160,7 +153,9 @@
     }
 
     function selectSuggestion(index, suggestion) {
-       inputValues[index] = suggestion;
+        // console.log(inputValues);
+
+        inputValues[index] = suggestion;
         suggestions[index] = [];
     }
 
@@ -196,37 +191,19 @@
         endMonth = `${months[endMonth]}`
     }
     for (let value of inputValues) {
-    // console.log(inputValues);
-    if (months[startMonth] >= 1 && months[startMonth] <= 9){
-        startMonth = `0${months[startMonth]}`
-    } else{
-        startMonth = `${months[startMonth]}`
-    }
-    if (months[endMonth] >= 1 && months[endMonth] <= 9){
-        endMonth = `0${months[endMonth]}`
-    } else{
-        endMonth = `${months[endMonth]}`
-    }
-    for (let value of inputValues) {
       // @ts-ignore
       if (value.trim() !== "") {
-      if (value.trim() !== "") {
         // @ts-ignore
-        items = [...items, value.trim()];
         items = [...items, value.trim()];
       }
     }
     
     inputValues = Array(9).fill('');
-    inputValues = Array(9).fill('');
   };
 
     async function processInput() {
         // console.log(items);
-        // console.log(items);
         try {
-            // const response = await axios.post('http://127.0.0.1:5000/process', {
-            await axios.post('http://127.0.0.1:5000/process', {
             // const response = await axios.post('http://127.0.0.1:5000/process', {
             await axios.post('http://127.0.0.1:5000/process', {
                 ticker_list: items,
@@ -235,7 +212,6 @@
                 Normal: isNormal,
                 // @ts-ignore
                 Start: Number(`${startYear}${startMonth}`),
-                Start: Number(`${startYear}${startMonth}`),
                 // @ts-ignore
                 End: Number(`${endYear}${endMonth}`)
             }).then((response ) => {
@@ -249,21 +225,7 @@
                 results.second_chart.forEach(dataset => {
                     allPoints = allPoints.concat(dataset.data);
                 });
-                End: Number(`${endYear}${endMonth}`)
-            }).then((response ) => {
-                return new Promise((resolve, reject) => {
-                    nothing = false;
-                    resolve(response)
-                })
-            }).then((response) => {
-                results = response.data;
-                let allPoints = [];
-                results.second_chart.forEach(dataset => {
-                    allPoints = allPoints.concat(dataset.data);
-                });
 
-                let xValues = allPoints.map(point => point.x);
-                let yValues = allPoints.map(point => point.y);
                 let xValues = allPoints.map(point => point.x);
                 let yValues = allPoints.map(point => point.y);
 
@@ -271,19 +233,7 @@
                 let maxX = Math.max(...xValues);
                 let minY = Math.min(...yValues);
                 let maxY = Math.max(...yValues);
-                let minX = Math.min(...xValues);
-                let maxX = Math.max(...xValues);
-                let minY = Math.min(...yValues);
-                let maxY = Math.max(...yValues);
 
-            
-                desStats = results.first_prints;
-                corrStats = results.second_prints;
-                robust = results.third_prints;
-                console.log(robust);
-                // console.log(Object.keys(robust['Std']).length)
-                updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
-            })
             
                 desStats = results.first_prints;
                 corrStats = results.second_prints;
@@ -301,17 +251,14 @@
 
     // @ts-ignore
     function updateChart(dough, fill, minX, maxX, minY, maxY, combo, scatter) {
-    function updateChart(dough, fill, minX, maxX, minY, maxY, combo, scatter) {
         const labels = items;
         const dataPoints = dough;
-        const comboPoints = combo;
         const comboPoints = combo;
         const colors = labels.map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`); // Generates random colors
  
 
         const fillPoints = fill.map((dataset, i) => {
             const color = colors[i];
-            const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
             const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
             return {
                 ...dataset,
@@ -320,26 +267,6 @@
                 fill: true
             };
         });
-
-        const scatterPoints = scatter.map((dataset, i) => {
-            const color = colors[i];
-            if(i == scatter.length - 1){
-                return{
-                    ...dataset,
-                    backgroundColor: 'red',
-                    borderColor: 'red', 
-                }
-            }
-            // const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
-            return {
-                ...dataset,
-                backgroundColor: color,
-                borderColor: color, 
-               
-            };
-        });
-
-        
 
         const scatterPoints = scatter.map((dataset, i) => {
             const color = colors[i];
@@ -376,63 +303,6 @@
         if (combo_chart) {
             combo_chart.destroy();
         }
-
-        combo_chart = new Chart(cchartx, {
-            data: {
-                datasets: [...comboPoints.map((points, index) => ({
-                    type: 'line',
-                    label: `Line ${index + 1}`,
-                    data: points,
-                    fill: false,
-                    borderColor: index === 0 ? 'blue' : 'red',
-                    borderWidth: 2,
-                    pointRadius: 0
-                })),
-                ...scatterPoints.map(point => ({
-                    type: 'scatter',
-                    label: point.label,
-                    data: point.data,
-                    borderWidth: point.borderWidth,
-                    pointRadius: point.pointRadius,
-                    backgroundColor: point.backgroundColor,
-                    borderColor: point.borderColor
-                }))
-            ]
-            },
-            options: {
-                responsive: true,
-                borderWidth: 10,
-                borderRadius: 2,
-                hoverBorderWidth: 0,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            boxWidth: 20,
-                            padding: 10
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: "linear",
-                        stacked: true,
-                        title: {
-                            display: true,
-                            text: 'Allocation'
-                        }
-                    },
-                    x: {
-                        type: "linear",
-                        title: {
-                            display: true,
-                            text: 'Standard Deviation'
-                        }
-                    }
-                }
-            }
-        });
 
         combo_chart = new Chart(cchartx, {
             data: {
@@ -710,27 +580,6 @@
                         {/if}
                         </div>
                     {/each}
-            
-                    {#each inputValues as inputValue, index}
-                        <div class="relative">
-                        <input
-                            class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md"
-                            type="text"
-                            placeholder="Place ticker here..."
-                            bind:value={inputValues[index]}
-                            on:input={(e) => updateSuggestions(index, e.target.value)}
-                        >
-                        {#if suggestions[index].length > 0}
-                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10">
-                            {#each suggestions[index] as suggestion}
-                                <li class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
-                                {suggestion}
-                                </li>
-                            {/each}
-                            </ul>
-                        {/if}
-                        </div>
-                    {/each}
 
                 </div>
             </div>
@@ -762,73 +611,6 @@
         <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
             <canvas class="w-[75vw] min-w-[400px] combo-chart"></canvas>
         </div>
-    </div>
-
-    <div class="max-w-[90vw] ml-[5vw] mb-[15vh] mt-[15vh] grid grid-cols-2 justify-self-center justify-center align-center">
-        
-        <div>
-            <h1 class="text-center text-4xl mb-[5vh]">Asset Descriptive Statistics</h1>
-            <ul class="grid grid-cols-3 gap-[1.4vw]">
-                {#each desStats as item}
-                <li class="programming-stats w-[90%] h-[30vh] py-[6vh] px-[3vw]">
-                    {#each Object.entries(item) as [key, values]}
-                    <div class="flex flex-col justify-center align-center h-full w-full">
-                        <h2 class="text-xl text-center font-bold">{key}</h2>
-                        {#each values as value, index}
-                          <p class="text-center ">{desStats_labels[index]} - {value}</p>
-                        {/each}
-                      </div>
-                    {/each}
-                </li>
-                {/each}
-            </ul>
-        </div>
-        <div>
-            <h1 class="text-center text-4xl mb-[5vh]">Asset Correlation Matrix</h1>
-            <table class="w-[90%]">
-                <thead>
-                  <tr class="flex w-full">
-                    <th class="w-full"></th>
-                    {#each Object.keys(corrStats) as key}
-                      <th class="w-full"><p class="text-center mb-[3vh]">{key}</p></th>
-                    {/each}
-                  </tr>
-                </thead>
-                <tbody class="grid gap-[15px]">
-                  {#each Object.keys(corrStats) as rowKey}
-                    <tr class="flex w-full gap-[15px]">
-                      <th class="w-full grid items-center justify-center"><p>{rowKey}</p></th>
-                      {#each Object.keys(corrStats[rowKey]) as colKey}
-                        <td class="w-[85%] programming-stats h-[10vh] text-center shadow-xl rounded-lg grid items-center justify-center"><p class="text-lg">{corrStats[rowKey][colKey].toFixed(2)}</p></td>
-                      {/each}
-                    </tr>
-                  {/each}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="w-full flex flex-col justify-center items-center">
-        <h1 class="text-center text-4xl mb-[5vh]">Robust Efficient Frontier Portfolios</h1>
-        <div class="w-[80vw] mb-[15vh]">
-            <Table shadow>
-                <TableHead>
-                    {#each Object.keys(robust) as key}
-                        <TableHeadCell>{key}</TableHeadCell>
-                    {/each}
-                </TableHead>
-                <TableBody tableBodyClass="divide-y">
-                    {#each range as num}
-                    <TableBodyRow>
-                        {#each Object.keys(robust) as key}
-                            <TableBodyCell>{robust[key][num]}</TableBodyCell>
-                        {/each}
-                    </TableBodyRow>
-                    {/each}
-                    
-                </TableBody>
-            </Table>
-        </div>
-        
     </div>
 
     <div class="max-w-[90vw] ml-[5vw] mb-[15vh] mt-[15vh] grid grid-cols-2 justify-self-center justify-center align-center">
@@ -1008,7 +790,6 @@ input[type="checkbox"]:checked::after {
         align-items: center;
         gap: 24px;
         margin: 0 auto;
-        /* width: fit-content; */
         /* width: fit-content; */
         box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
         border-radius: 20px;
