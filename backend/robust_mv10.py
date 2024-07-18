@@ -75,6 +75,11 @@ def sharpe_ratio(x, meandf, covdf, rf):
 def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'], short = 0, maxuse = 1, normal = 1, startdate = 199302, enddate = 202312):
     answer = []
     datasets = []
+    mixed_data = []
+    mixed_data_scatter = []
+    descriptive_statistics = []
+    assest_corr = []
+    big_table = []
     gridsize = 100
     try: 
         cdf = df[(df['ym'] >= startdate) & (df['ym'] <= enddate)]
@@ -94,9 +99,11 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
         print("Asset Descriptive Statistics: ")
         for i in range(len(etflist)): 
             print(f"Asset {i+1} - {etflist[i]}: Mean - {meandf[i].round(4)}, Std - {stddf[i].round(4)}, SR - {assetsrdf[i].round(4)}")
+            descriptive_statistics.append({etflist[i]: [meandf[i].round(4), stddf[i].round(4), assetsrdf[i].round(4)]})
         print("Asset Correlation Matrix: ")
         print(cdf[etflist].corr())
-
+        assest_corr = cdf[etflist].corr()
+        # print(assest_corr)
         # Risk Free Rate
         rf = cdf['RF'].mean()
         
@@ -233,12 +240,45 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             maxSR_std = maxSR_std * np.sqrt(12)
             stddf = stddf * np.sqrt(12)
             meandf = meandf * 12
+
+            temp = []
+            for i in range(len(efstd)):
+                temp.append({'x': efstd[i], 'y': efret[i]})
+            mixed_data.append(temp)
+            temp = []
+            for i in range(len(cml_std)):
+                temp.append({'x': cml_std[i], 'y': cml_ret[i]})
+            mixed_data.append(temp)
+
             
             plt.plot(figsize=(15,5))
             plt.plot(stdlist, retspace, linewidth = 1)
             plt.scatter(stddf, meandf, color='purple', marker='o', s=40)
             for i in range(len(etflist)): 
                 plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
+
+            for i in range(len(stddf)):
+                temp = [{'x': stddf.iloc[i], 'y': meandf.iloc[i]}]
+                dataset = {
+                    'label': etflist[i],
+                    'data': temp,
+                    'borderWidth': 1,
+                    'pointRadius': 4
+                }
+                mixed_data_scatter.append(dataset)
+            
+            # print(maxSR_std)
+            temp = [{'x': maxSR_std, 'y': maxSR_ret}]
+            dataset = {
+                'label': 'MVP',
+                'data': temp,
+                'borderWidth': 1,
+                'pointRadius': 8,
+
+            }
+            mixed_data_scatter.append(dataset)
+
+
             plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
             plt.text(maxSR_std, maxSR_ret, s="MVP", horizontalalignment='right', verticalalignment='top', fontsize=10)
             plt.gca().set_xlim(left=0)
@@ -295,7 +335,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             simwdf = np.zeros(gridsize)
             
             # Simulation Parameters Set Up
-            Nsim = 300
+            Nsim = 100
             iter = 0
             random.seed(123)
             while iter < Nsim: 
@@ -404,10 +444,46 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             plt.plot(figsize=(15,5))
             plt.plot(efstd, efret, linewidth = 1)
             plt.plot(cml_std, cml_ret, color='red', linewidth = 1)
+
+
+            temp = []
+            for i in range(len(efstd)):
+                temp.append({'x': efstd[i], 'y': efret[i]})
+            mixed_data.append(temp)
+            temp = []
+            for i in range(len(cml_std)):
+                temp.append({'x': cml_std[i], 'y': cml_ret[i]})
+            mixed_data.append(temp)
+
+
+
             plt.scatter(stddf, meandf, color='purple', marker='o', s=40)
             for i in range(len(etflist)): 
                 plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
             plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
+
+            for i in range(len(stddf)):
+                temp = [{'x': stddf.iloc[i], 'y': meandf.iloc[i]}]
+                dataset = {
+                    'label': etflist[i],
+                    'data': temp,
+                    'borderWidth': 1,
+                    'pointRadius': 4
+                }
+                mixed_data_scatter.append(dataset)
+            
+            # print(maxSR_std)
+            temp = [{'x': maxSR_std, 'y': maxSR_ret}]
+            dataset = {
+                'label': 'MVP',
+                'data': temp,
+                'borderWidth': 1,
+                'pointRadius': 8,
+
+            }
+            mixed_data_scatter.append(dataset)
+
+
             plt.text(maxSR_std, maxSR_ret, s="MVP", horizontalalignment='right', verticalalignment='top', fontsize=10)
             plt.gca().set_xlim(left=0)
             plt.gca().set_ylim(bottom=0)
@@ -452,11 +528,12 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             efpdf.index = efpdf.index + 1
             efpdf.index.name = '#'
             print(tabulate(efpdf, headers='keys', tablefmt='github'))
+            big_table.append(efpdf)
 
-        return answer, datasets
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table
     except: 
         print("error")
-        return answer, datasets
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table
         # mv(df, etflist, short, 0, normal, startdate, enddate)
 # %% 
 plt.rcParams['figure.figsize'] = [15, 5]
@@ -475,7 +552,7 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # maxuse = 0 (set to 0 for balanced sample)
 # normal = 0 (set to zero for resampling)
 
-# mv(df, etflist, 0, 0, 0, 201512, 202312)
+# mv(df, etflist, 1, 1, 1, 201512, 202312)
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -488,11 +565,27 @@ def process():
     startDate = data.get('Start', 0)
     endDate = data.get('End', 0)
     print(ticker_list, isShort, isMax, isNormal, startDate, endDate)
-    first_chart, second_chart = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
-    print(second_chart)
+    first_chart, second_chart, third_chart, third_chart_2, first_prints, second_prints, third_prints = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
+    if isinstance(first_chart, np.ndarray) and first_chart.size > 0:
+        first_chart = first_chart.tolist()
+    else:
+        first_chart = []
+    if isinstance(second_prints, (pd.DataFrame, pd.Series)) and not second_prints.empty:
+        second_prints_dict = second_prints.to_dict()
+    else:
+        second_prints_dict = []
+    if isinstance(third_prints, list) and third_prints and hasattr(third_prints[0], 'to_dict'):
+        third_prints_dict = third_prints[0].to_dict()
+    else:
+        third_prints_dict = []
     response_data = {
-        'first_chart': first_chart.tolist(),
-        'second_chart': second_chart
+        'first_chart': first_chart,
+        'second_chart': second_chart,
+        'third_chart': third_chart,
+        'third_chart_2': third_chart_2,
+        'first_prints': first_prints,
+        'second_prints': second_prints_dict,
+        'third_prints': third_prints_dict
     }
     return jsonify(response_data)
 
