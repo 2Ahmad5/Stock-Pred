@@ -37,6 +37,8 @@
     let isNormal = false;
     let nothing = true;
 
+    let isLoading = false;
+
     let csvData = []
     let etflist = []
 
@@ -186,6 +188,7 @@
         // console.log(items);
         try {
             // const response = await axios.post('http://127.0.0.1:5000/process', {
+            isLoading = true;
             await axios.post('http://127.0.0.1:5000/process', {
                 ticker_list: items,
                 Short: isShort,
@@ -196,6 +199,7 @@
                 // @ts-ignore
                 End: Number(`${endYear}${endMonth}`)
             }).then((response ) => {
+                isLoading = false;
                 return new Promise((resolve, reject) => {
                     nothing = false;
                     resolve(response)
@@ -533,7 +537,7 @@
 </script>
 
 <body>
-    <div class="main-page">
+    <div class="main-page" style="cursor: {isLoading ? 'wait' : 'auto'};">
         <div class="all-inputs">
             <div>
                 <h2 class="mb-[3vh] text-2xl">Advanced Options</h2>
