@@ -2,7 +2,6 @@
 ## @uthor: Henry ##
 
 # %%
-
 import pandas as pd
 import numpy as np
 import os 
@@ -19,7 +18,6 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-
 
 # %% 
 def get_data(file_name):
@@ -99,11 +97,19 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
         print("Asset Descriptive Statistics: ")
         for i in range(len(etflist)): 
             print(f"Asset {i+1} - {etflist[i]}: Mean - {meandf[i].round(4)}, Std - {stddf[i].round(4)}, SR - {assetsrdf[i].round(4)}")
+
+
+            # edited
             descriptive_statistics.append({etflist[i]: [meandf[i].round(4), stddf[i].round(4), assetsrdf[i].round(4)]})
+
+
+
         print("Asset Correlation Matrix: ")
         print(cdf[etflist].corr())
+
+        # edited
         assest_corr = cdf[etflist].corr()
-        # print(assest_corr)
+
         # Risk Free Rate
         rf = cdf['RF'].mean()
         
@@ -210,8 +216,10 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 perctw = weightlist[maxSRW][i] * 100
                 print(f"Asset {i+1} - {etflist[i]}: {perctw.round(2)}%")
             if not short: 
+
+                # edited
                 answer = weightlist[maxSRW][:]
-                print(weightlist[maxSRW], "weight oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+
                 fig, ax = plt.subplots()
                 fig.patch.set_facecolor('white')
                 ax.set_facecolor('white')
@@ -219,10 +227,8 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 # Create the pie chart
                 wedges, texts, autotexts = ax.pie(weightlist[maxSRW], autopct='%1.1f%%',
                     shadow=False, startangle=140)
-                
                 ax.legend(wedges, etflist, loc='upper center', bbox_to_anchor=(0.5, -0.05),
                     fancybox=True, shadow=True, ncol=len(etflist))
-                
                 # Equal aspect ratio ensures that pie is drawn as a circle
                 ax.axis('equal')
                 plt.title(f'Max Sharpe Ratio Portfolio Weights, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
@@ -241,14 +247,18 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             stddf = stddf * np.sqrt(12)
             meandf = meandf * 12
 
+
+
+            # edited
             temp = []
-            for i in range(len(efstd)):
-                temp.append({'x': efstd[i], 'y': efret[i]})
+
+            for i in range(len(stdlist)):
+                
+                temp.append({'x': stdlist[i], 'y': retspace[i]})
             mixed_data.append(temp)
-            temp = []
-            for i in range(len(cml_std)):
-                temp.append({'x': cml_std[i], 'y': cml_ret[i]})
-            mixed_data.append(temp)
+
+
+
 
             
             plt.plot(figsize=(15,5))
@@ -257,6 +267,9 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             for i in range(len(etflist)): 
                 plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
 
+
+
+            # edited
             for i in range(len(stddf)):
                 temp = [{'x': stddf.iloc[i], 'y': meandf.iloc[i]}]
                 dataset = {
@@ -266,8 +279,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                     'pointRadius': 4
                 }
                 mixed_data_scatter.append(dataset)
-            
-            # print(maxSR_std)
+
             temp = [{'x': maxSR_std, 'y': maxSR_ret}]
             dataset = {
                 'label': 'MVP',
@@ -277,6 +289,9 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
 
             }
             mixed_data_scatter.append(dataset)
+
+
+
 
 
             plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
@@ -289,7 +304,6 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             plt.show()
 
             if not short: 
-                
                 colors = ['orange', 'blue', 'green', 'red', 'purple', 'cyan', 'magenta', 'yellow']
                 colorlist = colors[:len(etflist)]
                 fig, ax = plt.subplots(figsize=(12, 6))
@@ -298,9 +312,11 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 for i, e in enumerate(allocations.columns):
                     ax.fill_between(stdlist, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
                     bottom += allocations[e]  
-            
+
+
+                # edited
                 for i, e in enumerate(allocations.columns):
-                    data = [{'x': efstd[j], 'y': allocations[e].iloc[j]} for j in range(len(efstd))]
+                    data = [{'x': stdlist[j], 'y': allocations[e].iloc[j]} for j in range(len(stdlist))]
                     dataset = {
                         'label': e,
                         'data': data,
@@ -310,7 +326,10 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                         'pointRadius': 4,
                     }
                     datasets.append(dataset)
-                # print("ooooooooooooooooooofffffffffffffffffffffffff")
+
+
+
+
                 plt.title(f'Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
                 plt.xlabel('Standard Deviation')
                 plt.ylabel('Allocation')
@@ -326,6 +345,12 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             efpdf.index = efpdf.index + 1
             efpdf.index.name = '#'
             print(tabulate(efpdf, headers='keys', tablefmt='github'))
+
+
+
+            # edited
+            big_table.append(efpdf)
+
 
             
             
@@ -419,15 +444,17 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             fig.patch.set_facecolor('white')
             ax.set_facecolor('white')
 
-            # Create the pie chart
+
+            # edited
             answer = robw[:] 
-            # print(robw, "rob oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+
+
+            # Create the pie chart
             wedges, texts, autotexts = ax.pie(robw, autopct='%1.1f%%',
                 shadow=False, startangle=140)
             ax.legend(wedges, etflist, loc='upper center', bbox_to_anchor=(0.5, -0.05),
                 fancybox=True, shadow=True, ncol=len(etflist))
             # Equal aspect ratio ensures that pie is drawn as a circle
-            
             ax.axis('equal')
             plt.title(f'Robust Max Sharpe Ratio Portfolio Weights, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
             plt.show()
@@ -446,6 +473,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             plt.plot(cml_std, cml_ret, color='red', linewidth = 1)
 
 
+            # edited
             temp = []
             for i in range(len(efstd)):
                 temp.append({'x': efstd[i], 'y': efret[i]})
@@ -453,7 +481,9 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             temp = []
             for i in range(len(cml_std)):
                 temp.append({'x': cml_std[i], 'y': cml_ret[i]})
-            mixed_data.append(temp)
+            mixed_data.append(temp[0:len(temp) - 1])
+
+
 
 
 
@@ -462,6 +492,8 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
             plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
 
+
+            # edited
             for i in range(len(stddf)):
                 temp = [{'x': stddf.iloc[i], 'y': meandf.iloc[i]}]
                 dataset = {
@@ -478,10 +510,12 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 'label': 'MVP',
                 'data': temp,
                 'borderWidth': 1,
-                'pointRadius': 8,
+                'pointRadius': 4,
 
             }
             mixed_data_scatter.append(dataset)
+
+
 
 
             plt.text(maxSR_std, maxSR_ret, s="MVP", horizontalalignment='right', verticalalignment='top', fontsize=10)
@@ -500,7 +534,9 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             for i, e in enumerate(allocations.columns):
                 ax.fill_between(efstd, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
                 bottom += allocations[e]  
-            
+
+
+            # edited
             for i, e in enumerate(allocations.columns):
                 data = [{'x': efstd[j], 'y': allocations[e].iloc[j]} for j in range(len(efstd))]
                 dataset = {
@@ -512,7 +548,10 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                     'pointRadius': 4,
                 }
                 datasets.append(dataset)
-            # print(datasets, 'ooooooooooooooooooooooooooooooooooooooooooooooo')
+
+
+
+
             plt.title(f'Robust Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
             plt.xlabel('Standard Deviation')
             plt.ylabel('Allocation')
@@ -528,6 +567,9 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             efpdf.index = efpdf.index + 1
             efpdf.index.name = '#'
             print(tabulate(efpdf, headers='keys', tablefmt='github'))
+
+
+            # edited
             big_table.append(efpdf)
 
         return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table
@@ -538,7 +580,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
 # %% 
 plt.rcParams['figure.figsize'] = [15, 5]
 ff_file = 'F-F_Research_Data_Factors.csv'
-etf_file = 'ETF_returns.csv'
+etf_file = 'ETF_returns_v3.csv'
 df = get_and_merge(ff_file, etf_file)
 
 # %%
@@ -552,7 +594,11 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # maxuse = 0 (set to 0 for balanced sample)
 # normal = 0 (set to zero for resampling)
 
-# mv(df, etflist, 1, 1, 1, 201512, 202312)
+# mv(df, ['AAPL', 'BNDX', 'VWO', 'VEA', 'AMZN', 'MSFT', 'NVDA'], 0, 0, 0, 201512, 202312)
+
+
+# edited
+
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -591,5 +637,7 @@ def process():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 # %%

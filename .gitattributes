@@ -1,4 +1,4 @@
 # Auto detect text files and perform LF normalization
 * text=auto
-my-app/static/ETF_returns_v2.csv filter=compress
+backend/ETF_returns_v3.csv filter=compress
 

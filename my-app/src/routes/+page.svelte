@@ -32,9 +32,9 @@
     let line_chart;
     let combo_chart;
 
-    let isShort = true;
-    let isMax = true;
-    let isNormal = true;
+    let isShort = false;
+    let isMax = false;
+    let isNormal = false;
     let nothing = true;
 
     let csvData = []
@@ -47,81 +47,51 @@
         },
         });
 
-        const storedCsvData = await db.get('keyval', 'csvData');
         const storedEtfList = await db.get('keyval', 'etfList');
 
-        if (storedCsvData && storedEtfList) {
-            csvData = storedCsvData;
+        if (storedEtfList) {
             etflist = storedEtfList;
-        }else{
-            const response = await fetchCsv('/ETF_returns_v2.csv');
-            if (response.ok) {
-                const csvText = await response.text();
-                csvData = JSON.parse(csvJSON(csvText));
-                etflist = extractColumnValues(csvData, 'ticker_new');
-                console.log(etflist)
 
-                await db.put('keyval', csvData, 'csvData');
-                await db.put('keyval', etflist, 'etfList');
-            }
+            console.log(etflist);
+        }else{ 
+            const response = await fetchCsv('/ETF_tickers_only.csv');
+            etflist = response;
+            console.log(etflist)
+
+            await db.put('keyval', etflist, 'etfList');
         }
     
     });
 
-    function extractColumnValues(data, column) {
-        const values = new Set();
-        data.forEach(row => {
-        if (row[column] !== undefined) {
-            values.add(row[column]);
-        }
+    function fetchCsv(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+            const csvData = event.target.result;
+            const rows = csvData.split('\n');
+            const result = rows.map(row => row.split(',').map(cell => cell.trim()));
+            resolve(result);
+            };
+
+            reader.onerror = function() {
+                reject('Error reading file');
+            };
+
+            reader.readAsText(file);
         });
-        return Array.from(values);
     }
 
-    function csvJSON(csv) {
-    var lines = csv.split("\n");
-    var result = [];
-    var headers = lines[0].split(",");
-
-    for (var i = 1; i < lines.length; i++) {
-      var obj = {};
-      var currentline = lines[i].split(",");
-
-      for (let j = 0; j < headers.length; j++) {
-        const header = headers[j] ? headers[j].trim() : '';
-        const value = currentline[j] ? currentline[j].trim() : '';
-        obj[header] = value;
-      }
-
-      if (Object.keys(obj).some(key => obj[key] !== '')) {
-        result.push(obj);
-      }
-    }
-    return JSON.stringify(result);
-  }
-
-    async function fetchCsv(filePath){
-        try{
-            const response = await fetch(filePath);
-            return response; 
-        } catch(error) {
-            console.error('Error fetching or parsing CSV file:', error);
-        }
-    }
 
     // @ts-ignore
-    function handleCheckboxChange1(event) {
-        isShort = !event.target.checked;
-        
-    }
     // @ts-ignore
     function handleCheckboxChange2(event) {
-        isNormal = !event.target.checked;
+        isNormal = event.target.checked;
         
     }
     // @ts-ignore
     function handleCheckboxChange3(event) {
-        isMax = !event.target.checked;
+        isMax = event.target.checked;
         
     }
     
@@ -152,8 +122,19 @@
         .slice(0, 3);
     }
 
+    let isFocused = Array(9).fill(false);
+
+    function handleFocus(index){
+        isFocused[index] = true;
+    }
+
+    function handleBlur(index){
+        isFocused[index] = false;
+    }
+
+
     function selectSuggestion(index, suggestion) {
-        // console.log(inputValues);
+        console.log("working");
 
         inputValues[index] = suggestion;
         suggestions[index] = [];
@@ -238,7 +219,21 @@
                 desStats = results.first_prints;
                 corrStats = results.second_prints;
                 robust = results.third_prints;
-                console.log(robust);
+                // console.log(robust);
+                let new_robust = {}
+
+                for(const [key, value] of Object.entries(robust)){
+                    // console.log(key, value);
+                    if (key !== "Return" && key !== "SR" && key !== "Std"){
+                        new_robust[key] = value;
+                    }
+                    
+                }
+                new_robust['Std'] = robust['Std']
+                new_robust['SR'] = robust['SR']
+                new_robust['Return'] = robust['Return']
+                console.log(new_robust);
+                robust = new_robust;
                 // console.log(Object.keys(robust['Std']).length)
                 updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
             })
@@ -304,6 +299,34 @@
             combo_chart.destroy();
         }
 
+        const scatterDataLabels = {
+            id: 'scatterDataLabels',
+
+            afterDatasetsDraw(chart, args, options) {
+                const {ctx, scales: {x, y}} = chart;
+                ctx.save();
+
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    if (dataset.type === 'scatter') {
+                        dataset.data.forEach((dataPoint, dataIndex) => {
+
+                            const valueX = dataPoint.x;
+                            const valueY = dataPoint.y;
+
+
+                            const pixelX = x.getPixelForValue(valueX);
+                            const pixelY = y.getPixelForValue(valueY);
+
+                            ctx.font = '12px sans-serif';
+                            ctx.fillText(dataset.label, pixelX, pixelY - 10);
+                        });
+                    }
+                });
+
+            ctx.restore();
+            }
+        }
+
         combo_chart = new Chart(cchartx, {
             data: {
                 datasets: [...comboPoints.map((points, index) => ({
@@ -347,7 +370,7 @@
                         stacked: true,
                         title: {
                             display: true,
-                            text: 'Allocation'
+                            text: 'Expected Returns'
                         }
                     },
                     x: {
@@ -358,7 +381,8 @@
                         }
                     }
                 }
-            }
+            },
+            plugins: [scatterDataLabels]
         });
 
         line_chart = new Chart(lchartx, {
@@ -514,18 +538,25 @@
             <div>
                 <h2 class="mb-[3vh] text-2xl">Advanced Options</h2>
                 <div class="checks text-xl mb-[5vh]">
-                    <div>
-                        <h2>Shorts</h2>
-                        <label><input type="checkbox" name="btn" on:change={handleCheckboxChange1} checked={!isShort}></label>
+                    <div class="flex flex-row gap-[1vw] justify-center align-center">
+                        <label><input class="w-[3vh] h-[3vh] rounded" type="checkbox" name="btn" on:change={handleCheckboxChange3} checked={isMax}></label>
+                        <h2 class="">Maxuse</h2>
+                        <div class="hover-container">
+                            <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
+                            <div class="hover-textbox">
+                                Lorem ipsum odor amet, consectetuer adipiscing elit. Non quam inceptos natoque sem phasellus, ex euismod consequat luctus.
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h2>Maxuse</h2>
-                        <label><input type="checkbox" name="btn" on:change={handleCheckboxChange3} checked={!isMax}></label>
-                        
-                    </div>
-                    <div>
+                    <div class="flex flex-row gap-[1vw] justify-center align-center">
+                        <label><input class="w-[3vh] h-[3vh] rounded" type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={isNormal}></label>
                         <h2>Normal</h2>
-                        <label><input type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={!isNormal}></label>
+                        <div class="hover-container">
+                            <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
+                            <div class="hover-textbox">
+                                Lorem ipsum odor amet, consectetuer adipiscing elit. Non quam inceptos natoque sem phasellus, ex euismod consequat luctus.
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -533,23 +564,23 @@
             <div class="dates mb-[5vh]">
                 <h2 class="text-2xl mb-[3vh]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
                 <div class="grid grid-cols-4 w-[90%] gap-[2vw]">
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl" id="year-picker" bind:value={startYear}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
                         {#each years as year}
                         <option class="text-sm rounded" value={year}>{year}</option>
                         {/each}
                     </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl" id="year-picker" bind:value={startMonth}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
                         {#each Object.entries(months) as [month, value]}
                         <option class="text-sm rounded" value={month}>{month}</option>
                         {/each}
                     </select>
                     
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl" id="year-picker" bind:value={endYear}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
                         {#each years as year}
                         <option class="text-sm rounded" value={year}>{year}</option>
                         {/each}
                     </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl" id="year-picker" bind:value={endMonth}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
                         {#each Object.entries(months) as [month, value]}
                         <option class="text-sm rounded" value={month}>{month}</option>
                         {/each}
@@ -563,18 +594,20 @@
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md"
+                            class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
                             type="text"
                             placeholder="Place ticker here..."
                             bind:value={inputValues[index]}
                             on:input={(e) => updateSuggestions(index, e.target.value)}
+                            on:focus={() => handleFocus(index)}
+                            on:blur={() => setTimeout(() => handleBlur(index), 500)}
                         >
-                        {#if suggestions[index].length > 0}
-                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10">
+                        {#if isFocused[index] && suggestions[index].length > 0}
+                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10 outline-none">
                             {#each suggestions[index] as suggestion}
-                                <li class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
+                                <option class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
                                 {suggestion}
-                                </li>
+                                </option>
                             {/each}
                             </ul>
                         {/if}
@@ -661,13 +694,15 @@
         <div class="w-[80vw] mb-[15vh]">
             <Table shadow>
                 <TableHead>
+                    <TableHeadCell>Index</TableHeadCell>
                     {#each Object.keys(robust) as key}
                         <TableHeadCell>{key}</TableHeadCell>
                     {/each}
                 </TableHead>
-                <TableBody tableBodyClass="divide-y">
+                <TableBody tableBodyClass="divide-y  max-h-[40vh]">
                     {#each range as num}
                     <TableBodyRow>
+                        <TableBodyCell>{num}</TableBodyCell>
                         {#each Object.keys(robust) as key}
                             <TableBodyCell>{robust[key][num]}</TableBodyCell>
                         {/each}
@@ -686,11 +721,40 @@
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
     @import '../app.css';
 
+    .hover-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .hover-textbox {
+        visibility: hidden;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        width: 10vw;
+        border-radius: 6px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        font-size: 14px;
+        line-height: 2vh;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .hover-container:hover .hover-textbox {
+        visibility: visible;
+        opacity: 1;
+    }
+
     select:focus{
         outline: none;
     }
     input:focus{
-        outline: none;
+        outline: none !important;
     }
     .main-page{
         width: 100vw;
@@ -718,7 +782,7 @@
         text-align: center;
     }
 
-    input[type="checkbox"]{
+    /* input[type="checkbox"]{
         position: relative;
         width: 100px;
         height: 30px;
@@ -774,7 +838,7 @@ input[type="checkbox"]:checked::after {
     left: 45px;
     box-shadow: 0 0 0 1px #232323;
     background: #555;
-}
+} */
 
     .chart-heading {
         font-family: 'Rubik', sans-serif;
