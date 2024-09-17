@@ -29,6 +29,8 @@
 
 
     let results = {};
+    let summary = {};
+    let tbl_summary = {};
 
     let startYear = "";
     let endYear = "";
@@ -38,6 +40,7 @@
     let model = "";
 
     let isFocused = false;
+    let submit = false;
 
     let years = [];
     let suggestions = [];
@@ -118,8 +121,12 @@
                     resolve(response)
                 })
             }).then((response) => {
+                submit = true;
                 results = response.data;
-                // console.log(results);
+                summary = results.mdl_summary;
+                tbl_summary = results.tbl_summary;
+                console.log(tbl_summary);
+
 
                 updateChartData(results.line_graph_1[0], results.line2[0], results.line3[0], results.line4[0]);
             })
@@ -348,6 +355,72 @@
         
 
     </div>
+    {#if submit}
+    <div class="w-screen h-screen items-center">
+        <h1 class="text-2xl mt-[15vh] text-center">OLS Regression Results</h1>
+        <div class="grid grid-cols-2">
+            <div class="flex flex-col items-center">
+            
+                <div class="grid grid-cols-2 grid-rows-9 w-[40vw] mt-[10vh] gap-[1vw]">
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Dep. Variable: </p></div><div class="mr-[10%]"><p>{summary["Dep. Variable"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>R-squared: </p></div><div class="mr-[10%]"><p>{summary["R-squared"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Model: </p></div><div class="mr-[10%]"><p>{summary["Model"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Adj. R-squared: </p></div><div class="mr-[10%]"><p>{summary["Adj. R-squared"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Method: </p></div><div class="mr-[10%]"><p>{summary["Method"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>F-statistic: </p></div><div class="mr-[10%]"><p>{summary["F-statistic"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Date: </p></div><div class="mr-[10%]"><p>{summary["date"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Prob (F-statistic): </p></div><div class="mr-[10%]"><p>{summary["Prob (F-statistic)"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Time: </p></div><div class="mr-[10%]"><p>{summary["time"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Log-Likelihood: </p></div><div class="mr-[10%]"><p>{summary["Log-Likelihood"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>No. Observations: </p></div><div class="mr-[10%]"><p>{summary["No. Observations"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>AIC: </p></div><div class="mr-[10%]"><p>{summary["AIC"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Df Residuals: </p></div><div class="mr-[10%]"><p>{summary["Df Residuals"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>BIC: </p></div><div class="mr-[10%]"><p>{summary["BIC"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Df Model: </p></div><div class="mr-[10%]"><p>{summary["Df Model"]}</p></div></div>
+                    <div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Covariance Type: </p></div><div class="mr-[10%]"><p>{summary["Covariance Type"]}</p></div></div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="grid grid-cols-2 grid-rows-4 w-[40vw] mt-[10vh] gap-[1vw]">
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Omnibus: </p></div><div class="mr-[10%]"><p>{summary["Omnibus"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Durbin-Watson: </p></div><div class="mr-[10%]"><p>{summary["Durbin-Watson"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Prob(Omnibus): </p></div><div class="mr-[10%]"><p>{summary["Prob(Omnibus)"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Jarque-Bera (JB): </p></div><div class="mr-[10%]"><p>{summary["Jarque-Bera (JB)"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Skew: </p></div><div class="mr-[10%]"><p>{summary["Skew"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Prob(JB): </p></div><div class="mr-[10%]"><p>{summary["Prob(JB)"]}</p></div></div>
+                    <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Kurtosis: </p></div><div class="mr-[10%]"><p>{summary["Kurtosis"]}</p></div></div>
+                    <div></div>
+                </div>
+                <div class="w-[90%] mt-[10vh] grid pr-[20%] items-center">
+                    <table>
+                        <thead>
+                            <tr class="w-full flex">
+                                <th class="w-full"></th>
+                                <th class="w-full"><p class="text-center mb-[3vh]">Av. Ann. Excess Return</p></th>
+                                <th class="w-full"><p class="text-center mb-[3vh]">Return Contribution</p></th>
+                            </tr>
+                        </thead>
+                        <tbody class="grid gap-[5px]">
+                            {#each Object.keys(tbl_summary) as rowKey}
+                                <tr class="flex w-full gap-[15px] mb-[15px]">
+                                    <th class="w-full grid items-center justify-center"><p>{rowKey}</p></th>
+                                    {#each Object.keys(tbl_summary[rowKey]) as colKey}
+                                        <td class="w-[75%] programming-stats h-[5vh] text-center shadow-xl rounded-lg grid items-center justify-center"><p class="text-lg">{tbl_summary[rowKey][colKey]}</p></td>
+                                    {/each}
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+                </div>
+                
+
+            </div>
+        </div>
+
+        
+    </div>
+    {/if}
 
 
 </body>
@@ -373,6 +446,16 @@
     transition: all 400ms ease;
 }
 .programming-stats:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+}
+
+
+.data-item{
+    transition: all 400ms ease;
+}
+
+.data-item:hover {
     transform: scale(1.02);
     box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
 }

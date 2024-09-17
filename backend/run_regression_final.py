@@ -3,9 +3,12 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
+from statsmodels.stats.stattools import durbin_watson, omni_normtest, jarque_bera
+from scipy.stats import skew, kurtosis
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +20,8 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
     line_2 = []
     line_3 = []
     line_4 = []
+    summary_data = {}
+    return_table = {}
 
     data_short = final_data[final_data['ticker_new'] == ticker]
     
@@ -68,6 +73,38 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
     
     # Regression Table
     print(mdl.summary())
+
+
+    # edited
+
+    summary_data = {
+    "R-squared": round(mdl.rsquared, 3),
+    "Dep. Variable": "y",
+    "Model": "OLS",
+    "Adj. R-squared": round(mdl.rsquared_adj, 3),
+    "F-statistic": round(mdl.fvalue, 3),
+    "Method": "Least Squares",
+    "Prob (F-statistic)": "{:.3e}".format(mdl.f_pvalue),
+    "date": datetime.now().strftime("%a, %d %b %Y"),
+    "time": datetime.now().strftime("%H:%M:%S"),
+    "Log-Likelihood": round(mdl.llf,2),
+    "AIC": round(mdl.aic, 1),
+    "BIC": round(mdl.bic, 1),
+    "No. Observations": mdl.nobs,
+    "Df Residuals": mdl.df_resid,
+    "Df Model": mdl.df_model,
+    "Covariance Type": mdl.cov_type,
+    "Durbin-Watson": round(durbin_watson(mdl.resid), 3),
+    "Omnibus": round(omni_normtest(mdl.resid)[0], 3),
+    "Prob(Omnibus)": round(omni_normtest(mdl.resid)[1], 3),
+    "Jarque-Bera (JB)": round(jarque_bera(mdl.resid)[0], 3),
+    "Prob(JB)": round(jarque_bera(mdl.resid)[1], 6),
+    "Skew": round(skew(mdl.resid), 3),
+    "Kurtosis": round(kurtosis(mdl.resid), 3),
+    }
+
+
+
     
     # Create Table with return contribution
     return_contribution = np.full((n_factors + 2, 2), np.nan)
@@ -85,6 +122,21 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
                                           index=[ticker, 'alpha'] + factor_names)
     
     print(return_contribution_df)
+
+
+    #edited
+
+    def clean_nan_to_none(row):
+        return ["None" if np.isnan(x) else round(x, 6) for x in row]
+
+
+    return_table[ticker] = clean_nan_to_none(return_contribution_df.loc[ticker].tolist())
+    return_table['alpha'] = clean_nan_to_none(return_contribution_df.loc["alpha"].tolist())
+    return_table["Mkt-Rf"] = clean_nan_to_none(return_contribution_df.loc["Mkt-Rf"].tolist())
+    return_table["HML"] = clean_nan_to_none(return_contribution_df.loc["HML"].tolist())
+    return_table["SMB"] = clean_nan_to_none(return_contribution_df.loc["SMB"].tolist())
+
+
     
     # Rolling regression
     if rolling_period is None or pd.isna(rolling_period):
@@ -180,9 +232,8 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         fig.legend([f'Alpha'] + factor_names, loc='lower right', ncol=n_factors+1)
         plt.show()
 
-        # print(out_roll)
 
-        return line_graph_1, line_2, line_3, line_4
+        return line_graph_1, line_2, line_3, line_4, summary_data, return_table
 
 # %% 
 # Import data from CSV file
@@ -233,12 +284,14 @@ def process2():
     endDate = data.get('End', 0)
     model = data.get('Mod', '')
     print(ticker, startDate, endDate, model)
-    line_graph_1, line2, line3, line4 = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
+    line_graph_1, line2, line3, line4, mdl_summary, tbl_summary = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
     response_data = {
         'line_graph_1': line_graph_1,
         'line2': line2,
         'line3': line3,
         'line4': line4,
+        'mdl_summary': mdl_summary,
+        'tbl_summary': tbl_summary
     }
     return jsonify(response_data)
 
