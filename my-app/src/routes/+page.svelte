@@ -21,6 +21,8 @@
 
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
 
+    import Navbar from '../Navbar/+page.svelte';
+
     
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
 
@@ -185,9 +187,7 @@
   };
 
     async function processInput() {
-        // console.log(items);
         try {
-            // const response = await axios.post('http://127.0.0.1:5000/process', {
             isLoading = true;
             await axios.post('http://127.0.0.1:5000/process', {
                 ticker_list: items,
@@ -537,7 +537,10 @@
 </script>
 
 <body>
+
+    <Navbar/>
     <div class="main-page" style="cursor: {isLoading ? 'wait' : 'auto'};">
+        
         <div class="all-inputs">
             <div>
                 <h2 class="mb-[3vh] text-2xl">Advanced Options</h2>
@@ -721,9 +724,11 @@
     {/if}
 </body>
 
+
 <style lang="css">
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
     @import '../app.css';
+
 
     .hover-container {
         position: relative;
