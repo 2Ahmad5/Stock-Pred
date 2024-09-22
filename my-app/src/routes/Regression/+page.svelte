@@ -31,6 +31,7 @@
     let results = {};
     let summary = {};
     let tbl_summary = {};
+    let mid_values = {}
 
     let startYear = "";
     let endYear = "";
@@ -46,6 +47,8 @@
     let suggestions = [];
     let etflist = [];
     let models = ["CAPM", "FF3", "FF4", "FF5"];
+    let mid_titles = []
+
 
     for (let year = 1970; year <= 2024; year++) {
         years.push(year);
@@ -125,10 +128,12 @@
                 results = response.data;
                 summary = results.mdl_summary;
                 tbl_summary = results.tbl_summary;
-                console.log(tbl_summary);
+                mid_titles = results.mid_titles;
+                mid_values = results.mid_values;
+                console.log(mid_titles);
 
 
-                updateChartData(results.line_graph_1[0], results.line2[0], results.line3[0], results.line4[0]);
+                updateChartData(results.line_graph_1[0], results.line2[0], results.line3[0], results.line4[0], results.line5[0], results.line6[0]);
             })
 
 
@@ -137,7 +142,7 @@
         }
     }
 
-    function updateChartData(fl, sl, tl, forl){
+    function updateChartData(fl, sl, tl, forl, fil, sil){
 
         
 
@@ -147,7 +152,7 @@
             first_line_chart.destroy();
         }
 
-        console.log(fl);
+        // console.log(fl);
 
         first_line_chart = new Chart(ctx, {
             type: 'line',
@@ -194,6 +199,28 @@
                     borderWidth: forl.borderWidth,
                     pointRadius: forl.pointRadius,
                     borderDash: [2, 2],
+                    fill: false,
+                    yAxisID: 'y1'
+                },
+                {
+                    type: 'line',
+                    label: fil.label,
+                    data: fil.data,
+                    borderColor: fil.borderColor,
+                    borderWidth: fil.borderWidth,
+                    pointRadius: fil.pointRadius,
+                    borderDash: [2, 4, 2],
+                    fill: false,
+                    yAxisID: 'y1'
+                },
+                {
+                    type: 'line',
+                    label: sil.label,
+                    data: sil.data,
+                    borderColor: sil.borderColor,
+                    borderWidth: sil.borderWidth,
+                    pointRadius: sil.pointRadius,
+                    borderDash: [20, 10],
                     fill: false,
                     yAxisID: 'y1'
                 }
@@ -356,9 +383,9 @@
 
     </div>
     {#if submit}
-    <div class="w-screen h-screen items-center">
+    <div class="w-screen items-center">
         <h1 class="text-2xl mt-[15vh] text-center">OLS Regression Results</h1>
-        <div class="grid grid-cols-2">
+        <div class="grid grid-cols-2 mb-[15vh]">
             <div class="flex flex-col items-center">
             
                 <div class="grid grid-cols-2 grid-rows-9 w-[40vw] mt-[10vh] gap-[1vw]">
@@ -379,6 +406,31 @@
                     <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Df Model: </p></div><div class="mr-[10%]"><p>{summary["Df Model"]}</p></div></div>
                     <div></div>
                     <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Covariance Type: </p></div><div class="mr-[10%]"><p>{summary["Covariance Type"]}</p></div></div>
+                </div>
+                <div  class="w-[95%] mt-[10vh] grid items-center">
+                    <table class="table-fixed w-full">
+                        <thead  class="w-full">
+                            <tr class="w-full flex">
+                                <th class="w-full"></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">coef</p></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">std err</p></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">t</p></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">P>|t|</p></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">[0.025]</p></th>
+                                <th class="w-full"><p class="text-center mb-[2vh]">[0.975]</p></th>
+                            </tr>
+                        </thead>
+                        <tbody class="grid gap-[2px]">
+                            {#each Object.keys(mid_values) as rowKey}
+                                <tr class="flex w-full gap-[15px] mb-[15px]">
+                                    <th class="w-full grid items-center justify-center"><p>{rowKey}</p></th>
+                                    {#each mid_values[rowKey] as colKey}
+                                        <td class="w-full programming-stats h-[5vh] text-center shadow-xl rounded-lg grid items-center justify-center"><p class="text-lg">{colKey}</p></td>
+                                    {/each}
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="flex flex-col items-center">

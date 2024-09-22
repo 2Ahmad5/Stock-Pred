@@ -20,8 +20,12 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
     line_2 = []
     line_3 = []
     line_4 = []
+    line_5 = []
+    line_6 = []
     summary_data = {}
     return_table = {}
+    middle_titles = []
+    middle_values = {}
 
     data_short = final_data[final_data['ticker_new'] == ticker]
     
@@ -76,6 +80,25 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
 
 
     # edited
+    coefficients = mdl.params
+    standard_errors = mdl.bse
+    t_statistics = mdl.tvalues
+    p_values = mdl.pvalues
+    confidence_intervals = mdl.conf_int()
+
+    middle_titles = mdl.params.index.tolist()
+    middle_values = {
+        title: [
+            round(mdl.params[title], 3),
+            round(mdl.bse[title], 3),
+            round(mdl.tvalues[title], 3),
+            round(mdl.pvalues[title], 3),
+            round(mdl.conf_int().loc[title, 0], 3),
+            round(mdl.conf_int().loc[title, 1], 3)
+         ] for title in middle_titles
+        
+    } 
+
 
     summary_data = {
     "R-squared": round(mdl.rsquared, 3),
@@ -130,11 +153,9 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         return ["None" if np.isnan(x) else round(x, 6) for x in row]
 
 
-    return_table[ticker] = clean_nan_to_none(return_contribution_df.loc[ticker].tolist())
-    return_table['alpha'] = clean_nan_to_none(return_contribution_df.loc["alpha"].tolist())
-    return_table["Mkt-Rf"] = clean_nan_to_none(return_contribution_df.loc["Mkt-Rf"].tolist())
-    return_table["HML"] = clean_nan_to_none(return_contribution_df.loc["HML"].tolist())
-    return_table["SMB"] = clean_nan_to_none(return_contribution_df.loc["SMB"].tolist())
+    for label, row in return_contribution_df.iterrows():
+
+        return_table[label] = clean_nan_to_none(row.tolist())
 
 
     
@@ -143,7 +164,9 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         rolling_period = 36
     
     if nobs < rolling_period + 10:
+        
         print('Not enough observations for rolling regression')
+        return line_graph_1, line_2, line_3, line_4, line_5, line_6, summary_data, return_table, middle_titles, middle_values
     else:
         out_roll = np.full((nobs - rolling_period + 1, n_factors + 1), np.nan)
         
@@ -174,12 +197,27 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         temp1 = []
         temp2 = []
         temp3 = []
+        temp4 = []
+        temp5 = []
         for i in range(len(dates_aux)):
 
-            temp.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][0] * 12})
-            temp1.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][1]})
-            temp2.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][2]})
-            temp3.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][3]})
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 0:
+                temp.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][0] * 12})
+
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 1:
+                temp1.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][1]})
+
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 2:
+                temp2.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][2]})
+
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 3:
+                temp3.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][3]})
+
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 4:
+                temp4.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][4]})
+
+            if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 5:
+                temp5.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][5]})            
 
         dataset = {
             'label': 'Annualized_Alpha_Data',
@@ -196,27 +234,42 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
             'borderColor': 'orange'
         }
         dataset2 = {
-            'label': 'HML',
+            'label': 'HML' if len(temp2) > 0 else None,
             'data': temp2,
             'borderWidth': 1,
             'pointRadius': 2,
             'borderColor': 'orange'
         }
         dataset3 = {
-            'label': 'SMB',
+            'label': 'SMB' if len(temp3) > 0 else None,
             'data': temp3,
+            'borderWidth': 1,
+            'pointRadius': 2,
+            'borderColor': 'orange'
+        }
+        dataset4 = {
+            'label': 'CHA' if len(temp4) > 0 else None,
+            'data': temp4,
+            'borderWidth': 1,
+            'pointRadius': 2,
+            'borderColor': 'orange'
+        }
+        dataset5 = {
+            'label': 'RF' if len(temp5) > 0 else None,
+            'data': temp5,
             'borderWidth': 1,
             'pointRadius': 2,
             'borderColor': 'orange'
         }
 
 
+        
         line_graph_1.append(dataset)
         line_2.append(dataset1)
         line_3.append(dataset2)
         line_4.append(dataset3)
-    
-        
+        line_5.append(dataset4)
+        line_6.append(dataset5)
 
 
         linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 1, 1, 1, 1, 1))]
@@ -232,8 +285,8 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         fig.legend([f'Alpha'] + factor_names, loc='lower right', ncol=n_factors+1)
         plt.show()
 
-
-        return line_graph_1, line_2, line_3, line_4, summary_data, return_table
+        
+        return line_graph_1, line_2, line_3, line_4, line_5, line_6, summary_data, return_table, middle_titles, middle_values
 
 # %% 
 # Import data from CSV file
@@ -262,11 +315,11 @@ final_data = pd.merge(return_data, all_factors, on='date', how='outer').sort_val
 
 # %% 
 # Set parameters
-start_date = 200701
-end_date = 202201
+start_date = 201602
+end_date = 202009
 rolling_period = 72
-ticker = 'AAPL'
-model = 'FF3'  # CAPM, FF3, FF4, FF5
+ticker = 'AMZN'
+model = 'FF5'  # CAPM, FF3, FF4, FF5
 
 
 # %% 
@@ -284,14 +337,18 @@ def process2():
     endDate = data.get('End', 0)
     model = data.get('Mod', '')
     print(ticker, startDate, endDate, model)
-    line_graph_1, line2, line3, line4, mdl_summary, tbl_summary = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
+    line_graph_1, line2, line3, line4, line5, line6, mdl_summary, tbl_summary, mid_titles, mid_values = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
     response_data = {
         'line_graph_1': line_graph_1,
         'line2': line2,
         'line3': line3,
         'line4': line4,
+        'line5': line5,
+        'line6': line6,
         'mdl_summary': mdl_summary,
-        'tbl_summary': tbl_summary
+        'tbl_summary': tbl_summary,
+        "mid_titles": mid_titles,
+        "mid_values": mid_values
     }
     return jsonify(response_data)
 
