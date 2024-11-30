@@ -15,9 +15,12 @@ import cvxpy as cp
 from tabulate import tabulate
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import Blueprint
 
-app = Flask(__name__)
-CORS(app)
+main = Blueprint('main', __name__)
+
+# app = Flask(__name__)
+# CORS(app)
 
 # %% 
 def get_data(file_name):
@@ -600,7 +603,7 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # edited
 
 
-@app.route('/process', methods=['POST'])
+@main.route('/main', methods=['POST'])
 def process():
     data = request.json
     print(request.json)
@@ -635,8 +638,8 @@ def process():
     }
     return jsonify(response_data)
 
-if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+# if __name__ == '__main__':
+#     app.run(port=5000, debug=True)
 
 
 

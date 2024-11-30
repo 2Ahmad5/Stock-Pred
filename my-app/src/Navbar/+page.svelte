@@ -34,7 +34,8 @@
     .navbar a::after{
         content: '';
         position: absolute;
-        height: 5px;
+        height: 2px;
+        border-radius: 10px;
         left: 0;
         bottom: 0;
         width: 0;

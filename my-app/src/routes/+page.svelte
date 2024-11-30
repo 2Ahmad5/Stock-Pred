@@ -189,7 +189,7 @@
     async function processInput() {
         try {
             isLoading = true;
-            await axios.post('http://127.0.0.1:5000/process', {
+            await axios.post('http://127.0.0.1:5000/main', {
                 ticker_list: items,
                 Short: isShort,
                 Max: isMax,
@@ -791,63 +791,6 @@
         text-align: center;
     }
 
-    /* input[type="checkbox"]{
-        position: relative;
-        width: 100px;
-        height: 30px;
-        margin: 10px;
-        outline: none;
-        background: #5ce07f;
-        -webkit-appearance: none;
-        cursor: pointer;
-        border-radius: 20px;
-        box-shadow: -5px -5px 20px rgba(255, 255, 255, .1),
-        5px 5px 10px rgba(0,0,0,1), inset -2px -2px 5px rgba(255, 255, 255, .1), inset 2px 2px 5px rgba(0,0,0,.5), 0 0 0 2px #1f1f1f;
-        transition: .5s;
-    }
-
-    input[type="checkbox"]:checked{
-        background: #111;
-    }
-
-    input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 40px;
-    width: 60px;
-    height: 30px;
-    background: linear-gradient(to top, #000, #555);
-    border-radius: 20px;
-    box-shadow: 0 0 0 1px #232323;
-    transform: scale(0.98, 0.96);
-    transition: 0.5s;
-}
-
-input[type="checkbox"]:checked::before {
-    left: 0;
-}
-
-input[type="checkbox"]::after {
-    content: '';
-    position: absolute;
-    top: -webkit-calc(50% - 2px);
-    top: calc(50% - 2px);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    left: -webkit-calc(45px + 40px);
-    left: calc(45px + 40px);
-    background-color: #5ce07f;
-    box-shadow: 0 0 5px #5ce07f, 0 0 15px #5ce07f, 0 0 30px #5ce07f;
-    transition: 0.5s;
-}
-
-input[type="checkbox"]:checked::after {
-    left: 45px;
-    box-shadow: 0 0 0 1px #232323;
-    background: #555;
-} */
 
     .chart-heading {
         font-family: 'Rubik', sans-serif;

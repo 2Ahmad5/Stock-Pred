@@ -8,10 +8,12 @@ from scipy.stats import skew, kurtosis
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask import Blueprint
 
+run_regress = Blueprint('run_regress', __name__)
 
-app = Flask(__name__)
-CORS(app)
+# app = Flask(__name__)
+# CORS(app)
 
 
 def run_regression(final_data, ticker, start_date, end_date, model, rolling_period):
@@ -328,7 +330,7 @@ model = 'FF5'  # CAPM, FF3, FF4, FF5
 
 # %%
 
-@app.route('/process2', methods=['POST'])
+@run_regress.route('/run_regress', methods=['POST'])
 
 def process2():
     data = request.json
@@ -353,7 +355,7 @@ def process2():
     return jsonify(response_data)
 
 
-if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+# if __name__ == '__main__':
+#     app.run(port=5001, debug=True)
 
 

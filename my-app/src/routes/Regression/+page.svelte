@@ -113,7 +113,7 @@
 
     async function processInput(){
         try{
-            await axios.post('http://127.0.0.1:5001/process2', {
+            await axios.post('/run_regress', {
                 Tick: ticker,
                 Start: Number(`${startYear}${startMonth}`),
                 End: Number(`${endYear}${endMonth}`),
