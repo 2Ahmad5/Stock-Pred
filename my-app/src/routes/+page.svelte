@@ -444,13 +444,15 @@
                 labels: labels,
                 datasets: [{
                     label: 'Data',
+                    borderColor: '#2c2e2f',
                     data: dataPoints,
                     backgroundColor: colors
+                    
                 }]
             },
             options: {
                 // @ts-ignore
-                borderWidth: 10,
+                borderWidth: 5,
                 borderRadius: 2,
                 hoverBorderWidth: 0,
                 plugins: {
@@ -458,8 +460,8 @@
                         display: true,
                         position: 'top',
                         labels: {
-                        boxWidth: 20,
-                        padding: 10
+                        boxWidth: 10,
+                        padding: 3
                     }
                 }
             }
@@ -536,17 +538,17 @@
 
 </script>
 
-<body>
+<body class="bg-black">
 
     <Navbar/>
-    <div class="main-page" style="cursor: {isLoading ? 'wait' : 'auto'};">
+    <div class="main-page text-[#C0C0C0]" style=" cursor: {isLoading ? 'wait' : 'auto'};">
         
         <div class="all-inputs">
             <div>
-                <h2 class="mb-[3vh] text-2xl">Advanced Options</h2>
-                <div class="checks text-xl mb-[5vh]">
+                <h2 class="mb-[3vh] text-xl">Advanced Options</h2>
+                <div class="checks text-lg mb-[5vh]">
                     <div class="flex flex-row gap-[1vw] justify-center align-center">
-                        <label><input class="w-[3vh] h-[3vh] rounded" type="checkbox" name="btn" on:change={handleCheckboxChange3} checked={isMax}></label>
+                        <label><input class="w-[2.5vh] h-[2.5vh] rounded bg-[#2c2e2f]" type="checkbox" name="btn" on:change={handleCheckboxChange3} checked={isMax}></label>
                         <h2 class="">Maxuse</h2>
                         <div class="hover-container">
                             <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
@@ -556,7 +558,7 @@
                         </div>
                     </div>
                     <div class="flex flex-row gap-[1vw] justify-center align-center">
-                        <label><input class="w-[3vh] h-[3vh] rounded" type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={isNormal}></label>
+                        <label><input class="w-[2.5vh] h-[2.5vh]  rounded bg-[#2c2e2f]" type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={isNormal}></label>
                         <h2>Normal</h2>
                         <div class="hover-container">
                             <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
@@ -569,25 +571,25 @@
                 
             </div>
             <div class="dates mb-[5vh]">
-                <h2 class="text-2xl mb-[3vh]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
-                <div class="grid grid-cols-4 w-[90%] gap-[2vw]">
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
+                <h2 class="text-xl mb-[3vh]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
+                <div class="grid grid-cols-4 w-[75%] gap-[2vw]">
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startYear}>
                         {#each years as year}
                         <option class="text-sm rounded" value={year}>{year}</option>
                         {/each}
                     </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
                         {#each Object.entries(months) as [month, value]}
                         <option class="text-sm rounded" value={month}>{month}</option>
                         {/each}
                     </select>
                     
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
                         {#each years as year}
                         <option class="text-sm rounded" value={year}>{year}</option>
                         {/each}
                     </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
+                    <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
                         {#each Object.entries(months) as [month, value]}
                         <option class="text-sm rounded" value={month}>{month}</option>
                         {/each}
@@ -595,13 +597,13 @@
                 </div>
             </div>
             <div class="tickers mb-[5vh]">
-                <h2 class="text-2xl mb-[3vh]">Ticker Symbols</h2>
-                <div class="grid grid-rows-3 grid-cols-3 gap-[2vh] w-[95%]">
+                <h2 class="text-xl mb-[3vh]">Ticker Symbols</h2>
+                <div class="grid grid-rows-3 grid-cols-3 gap-[2vh] w-[75%]">
             
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                            class="w-full bg-[#2c2e2f] h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
                             type="text"
                             placeholder="Place ticker here..."
                             bind:value={inputValues[index]}
@@ -610,9 +612,9 @@
                             on:blur={() => setTimeout(() => handleBlur(index), 500)}
                         >
                         {#if isFocused[index] && suggestions[index].length > 0}
-                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10 outline-none">
+                            <ul class="absolute bg-[#2c2e2f] border border-gray-300 w-full mt-1 rounded-md z-10 outline-none">
                             {#each suggestions[index] as suggestion}
-                                <option class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
+                                <option class="p-2 hover:bg-[#131217] cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
                                 {suggestion}
                                 </option>
                             {/each}
@@ -623,12 +625,12 @@
 
                 </div>
             </div>
-            <button class="py-[10px] px-[30px] text-xl rounded-md hover:bg-[#5ce07f] ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+            <button class="py-[10px] px-[30px] text-xl rounded-md hover:bg-[#2b2c30] ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             
         </div>
-        <div class="flex flex-col rounded-bl-[15vh] bg-[#5ce07f] h-full items-center justify-center">
+        <div class="flex flex-col h-full items-center justify-center">
             <h1 class="text-4xl mb-[5vh]">Stock Doughnut Chart</h1>
-            <div class="programming-stats bg-white">
+            <div class="programming-stats">
                 {#if nothing}
                     <p>Enter your desired portfolio</p>
                 {/if}
@@ -640,87 +642,94 @@
         </div>
     </div>
     {#if !nothing}
-    <div class="w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-4xl mb-[5vh] text-center">Stock Line Fill Graph</h1>
-        <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-            <canvas class="w-[75vw] min-w-[400px] line-chart"></canvas>
+    <div class="lgraph w-full h-[100vh] flex flex-col justify-center align-center">
+        <h1 class="text-4xl mb-[5vh] text-center text-[#C0C0C0]">Stock Line Fill Graph</h1>
+        <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
+            <canvas class="w-[55vw] min-w-[400px] line-chart"></canvas>
         </div>
     </div>
-    <div class="w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-4xl mb-[5vh] text-center">Scatter Line Graph</h1>
-        <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-            <canvas class="w-[75vw] min-w-[400px] combo-chart"></canvas>
+    <div class="bg-black w-full h-[100vh] flex flex-col justify-center align-center">
+        <h1 class="text-4xl mb-[5vh] text-center text-[#C0C0C0]">Scatter Line Graph</h1>
+        <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
+            <canvas class="w-[55vw] min-w-[400px] combo-chart"></canvas>
         </div>
     </div>
-
-    <div class="max-w-[90vw] ml-[5vw] mb-[15vh] mt-[15vh] grid grid-cols-2 justify-self-center justify-center align-center">
+    <div class="rounded-t-[150px] bg-[#111111] w-[100vw] text-[#C0C0C0] mb-[15vh] pt-[15vh]">
+        <div class="grid grid-cols-2 gap-[5vw] justify-self-center justify-center align-center">
         
-        <div>
-            <h1 class="text-center text-4xl mb-[5vh]">Asset Descriptive Statistics</h1>
-            <ul class="grid grid-cols-3 gap-[1.4vw]">
-                {#each desStats as item}
-                <li class="programming-stats w-[90%] h-[30vh] py-[6vh] px-[3vw]">
-                    {#each Object.entries(item) as [key, values]}
-                    <div class="flex flex-col justify-center align-center h-full w-full">
-                        <h2 class="text-xl text-center font-bold">{key}</h2>
-                        {#each values as value, index}
-                          <p class="text-center ">{desStats_labels[index]} - {value}</p>
+            <div>
+                <h1 class="text-center text-2xl mb-[5vh]">Asset Descriptive Statistics</h1>
+                <ul class="grid grid-cols-3 gap-[1.4vw]">
+                    {#each desStats as item}
+                    <li class="programming-stats w-[20vh] h-[20vh] p-[2vh] bg-[#2c2e2f] rounded-lg border border-black/66">
+                        {#each Object.entries(item) as [key, values]}
+                        <div class="flex flex-col justify-center align-center h-full w-full">
+                            <h2 class="text-base text-center font-bold">{key}</h2>
+                            {#each values as value, index}
+                              <p class="text-center">{desStats_labels[index]} - {value}</p>
+                            {/each}
+                          </div>
                         {/each}
-                      </div>
+                    </li>
                     {/each}
-                </li>
-                {/each}
-            </ul>
-        </div>
-        <div>
-            <h1 class="text-center text-4xl mb-[5vh]">Asset Correlation Matrix</h1>
-            <table class="w-[90%]">
-                <thead>
-                  <tr class="flex w-full">
-                    <th class="w-full"></th>
-                    {#each Object.keys(corrStats) as key}
-                      <th class="w-full"><p class="text-center mb-[3vh]">{key}</p></th>
-                    {/each}
-                  </tr>
-                </thead>
-                <tbody class="grid gap-[15px]">
-                  {#each Object.keys(corrStats) as rowKey}
-                    <tr class="flex w-full gap-[15px]">
-                      <th class="w-full grid items-center justify-center"><p>{rowKey}</p></th>
-                      {#each Object.keys(corrStats[rowKey]) as colKey}
-                        <td class="w-[85%] programming-stats h-[10vh] text-center shadow-xl rounded-lg grid items-center justify-center"><p class="text-lg">{corrStats[rowKey][colKey].toFixed(2)}</p></td>
+                </ul>
+            </div>
+            <div>
+                <h1 class="text-center text-2xl mb-[5vh]">Asset Correlation Matrix</h1>
+                
+                <table class="w-[100%] border-collapse border border-gray-300">
+                    <thead>
+                      <tr class="bg-[#2c2e2f]">
+                        <th class="border border-gray-300 p-3 text-center font-bold"> </th>
+                        {#each Object.keys(corrStats) as key}
+                          <th class="border border-gray-300 p-3 text-center font-bold">{key}</th>
+                        {/each}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {#each Object.keys(corrStats) as rowKey}
+                        <tr>
+                          <th class="border bg-[#2c2e2f] border-gray-300 p-3 text-center font-medium">{rowKey}</th>
+                          {#each Object.keys(corrStats[rowKey]) as colKey}
+                            <td class="border border-gray-300 text-center p-3 hover:bg-[#2b2c30] transition-all ease-in-out duration-200">
+                              <p class="text-base font-mono">{corrStats[rowKey][colKey].toFixed(2)}</p>
+                            </td>
+                          {/each}
+                        </tr>
                       {/each}
-                    </tr>
-                  {/each}
-                </tbody>
-            </table>
+                    </tbody>
+                  </table>
+            </div>
+            
         </div>
-    </div>
-    <div class="w-full flex flex-col justify-center items-center">
-        <h1 class="text-center text-4xl mb-[5vh]">Robust Efficient Frontier Portfolios</h1>
-        <div class="w-[80vw] mb-[15vh]">
-            <Table shadow>
-                <TableHead>
-                    <TableHeadCell>Index</TableHeadCell>
-                    {#each Object.keys(robust) as key}
-                        <TableHeadCell>{key}</TableHeadCell>
-                    {/each}
-                </TableHead>
-                <TableBody tableBodyClass="divide-y  max-h-[40vh]">
-                    {#each range as num}
-                    <TableBodyRow>
-                        <TableBodyCell>{num}</TableBodyCell>
+        <div class="w-full flex flex-col justify-center items-center">
+            <h1 class="text-center text-2xl mt-[5vh] mb-[5vh]">Robust Efficient Frontier Portfolios</h1>
+            <div class="w-[80vw]">
+                <Table shadow>
+                    <TableHead>
+                        <TableHeadCell>Index</TableHeadCell>
                         {#each Object.keys(robust) as key}
-                            <TableBodyCell>{robust[key][num]}</TableBodyCell>
+                            <TableHeadCell>{key}</TableHeadCell>
                         {/each}
-                    </TableBodyRow>
-                    {/each}
-                    
-                </TableBody>
-            </Table>
+                    </TableHead>
+                    <TableBody tableBodyClass="divide-y  max-h-[40vh]">
+                        {#each range as num}
+                        <TableBodyRow>
+                            <TableBodyCell>{num}</TableBodyCell>
+                            {#each Object.keys(robust) as key}
+                                <TableBodyCell>{robust[key][num]}</TableBodyCell>
+                            {/each}
+                        </TableBodyRow>
+                        {/each}
+                        
+                    </TableBody>
+                </Table>
+            </div>
+            
         </div>
-        
     </div>
+    
+    
     {/if}
 </body>
 
@@ -774,11 +783,21 @@
         position: relative;
         top: 0;
         left: 0;
-        
+        /* background: linear-gradient(
+        to right,
+        #131217,
+        #1a191d 25%,
+        #0f0e10 50%,
+        #1a191d 75%, 
+        #0d0c0e 100% 
+        ); */
+        background: #0e0f13;
+
     }
 
     .all-inputs{
-        margin-left: 10vw;
+        margin-left: 12vw;
+        
     }
 
     .checks{
@@ -794,7 +813,7 @@
 
     .chart-heading {
         font-family: 'Rubik', sans-serif;
-        color: #023047;
+        color: white;
         text-transform: uppercase;
         font-size: 24px;
         text-align: center;
@@ -803,23 +822,34 @@
     .programming-stats {
         font-family: 'Rubik', sans-serif;
         display: flex;
-        align-items: center;
+        justify-content: end;
+        /* align-items: center; */
         gap: 24px;
         margin: 0 auto;
         /* width: fit-content; */
-        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3);
         border-radius: 20px;
         padding: 8px 32px;
-        color: #023047;
+        color: white;
         transition: all 400ms ease;
+        background-color: #2e3233;
     }
     .programming-stats:hover {
         transform: scale(1.02);
-        box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 16px -7px rgba(255, 255, 255, .6);
     }
     .programming-stats .details ul {
         list-style: none;
         padding: 0;
+    }
+
+    .lgraph{
+        background: linear-gradient(
+  to bottom,
+  #0e0f13,
+  #0c0d10 40%, 
+  black 100% 
+);
     }
     
     
