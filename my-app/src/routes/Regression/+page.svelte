@@ -113,7 +113,7 @@
 
     async function processInput(){
         try{
-            await axios.post('/run_regress', {
+            await axios.post('http://127.0.0.1:5000/run_regress', {
                 Tick: ticker,
                 Start: Number(`${startYear}${startMonth}`),
                 End: Number(`${endYear}${endMonth}`),
@@ -311,17 +311,17 @@
 <body>
 
     <Navbar/>
-    <div class="w-screen h-screen grid reg-page">
+    <div class="w-screen text-[#C0C0C0] h-screen grid reg-page">
 
-        <div class="flex flex-col bg-[#5ce07f] items-center justify-center">
+        <div class="flex flex-col ml-[10vw] items-center justify-center">
             <h2 class="text-xl w-[80%] mb-[3vh]">Start Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[80%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
@@ -329,12 +329,12 @@
             </div>
             <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">End Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[80%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
@@ -343,7 +343,7 @@
             <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">Ticker</h2>
             <div class="relative w-[80%]">
                 <input
-                    class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                    class="w-full h-[5vh] bg-[#2c2e2f] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
                     type="text"
                     placeholder="Place ticker here..."
                     bind:value={ticker}
@@ -363,20 +363,20 @@
             </div>
             <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">Model</h2>
             <div class="w-[80%]">
-                <select class="border-2 flex justify-center items-center w-[50%] rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" bind:value={model}>
+                <select class="border-2 flex justify-center items-center w-[50%] bg-[#2c2e2f] rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" bind:value={model}>
                     {#each models as mod}
                     <option class="text-sm rounded" value={mod}>{mod}</option>
                     {/each}
                 </select>
             </div>
             <div class="w-[80%]">
-                <button class="mt-[5vh] py-[10px] px-[30px] text-xl rounded-md bg-white ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+                <button class="mt-[5vh] py-[10px] px-[30px] text-xl rounded-md hover:bg-[#2b2c30] ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             </div>
 
         </div>
         <div class="flex items-center justify-center pt-[10vh]">
-            <div class="programming-stats h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-                <canvas class="w-[50vh] first-line-chart"></canvas>
+            <div class="programming-stats h-[60vh] w-[60vw] min-w-[400px] p-[5vh]">
+                <canvas class="w-[50vw] first-line-chart"></canvas>
             </div>
         </div>
         
@@ -480,27 +480,34 @@
 <style>
 
 .reg-page{
-    grid-template-columns: 15vw 85vw;
+    grid-template-columns: 25vw 75vw;
+    background: linear-gradient(to bottom, #0e0f13, #18121f 30%, #2f1532 60%, #501150 85%, #8c0091 100%);
 }
 
 .programming-stats {
     font-family: 'Rubik', sans-serif;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: end;
+    /* align-items: center; */
     gap: 24px;
     margin: 0 auto;
     /* width: fit-content; */
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3);
     border-radius: 20px;
     padding: 8px 32px;
-    color: #023047;
+    color: white;
     transition: all 400ms ease;
+    background-color: #2e3233;
 }
 .programming-stats:hover {
     transform: scale(1.02);
-    box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px -7px rgba(255, 255, 255, .6);
 }
+.programming-stats .details ul {
+    list-style: none;
+    padding: 0;
+}
+
 
 
 .data-item{
@@ -511,9 +518,6 @@
     transform: scale(1.02);
     box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.3);
 }
-.programming-stats .details ul {
-    list-style: none;
-    padding: 0;
-}
+
 
 </style>
