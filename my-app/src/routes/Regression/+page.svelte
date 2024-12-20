@@ -113,7 +113,7 @@
 
     async function processInput(){
         try{
-            await axios.post('/run_regress', {
+            await axios.post('http://127.0.0.1:5000/run_regress', {
                 Tick: ticker,
                 Start: Number(`${startYear}${startMonth}`),
                 End: Number(`${endYear}${endMonth}`),
@@ -311,39 +311,39 @@
 <body>
 
     <Navbar/>
-    <div class="w-screen h-screen grid reg-page">
+    <div class="w-screen text-[#C0C0C0] h-screen grid reg-page">
 
-        <div class="flex flex-col bg-[#5ce07f] items-center justify-center">
-            <h2 class="text-xl w-[80%] mb-[3vh]">Start Date (Year, Month)</h2>
-            <div class="grid grid-cols-2 w-[80%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
+        <div class="flex flex-col items-end justify-center">
+            <h2 class="text-lg  w-[40%] mb-[3vh]">Start Date (Year, Month)</h2>
+            <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%] " id="year-picker" bind:value={startYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
                 </select>
             </div>
-            <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">End Date (Year, Month)</h2>
-            <div class="grid grid-cols-2 w-[80%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
+            <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">End Date (Year, Month)</h2>
+            <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
                 </select>
             </div>
-            <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">Ticker</h2>
-            <div class="relative w-[80%]">
+            <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">Ticker</h2>
+            <div class="relative w-[40%]">
                 <input
-                    class="w-full h-[5vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                    class=" h-[5vh] border-[#696a6b] bg-[#2c2e2f] p-[10px] border-2 rounded-md outline-none"
                     type="text"
                     placeholder="Place ticker here..."
                     bind:value={ticker}
@@ -352,31 +352,31 @@
                     on:blur={() => setTimeout(() => handleBlur(), 500)}
                 >
                 {#if isFocused && suggestions.length > 0}
-                    <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10 outline-none">
+                    <ul class="absolute bg-[#2c2e2f] w-[40%] border border-gray-300 mt-1 rounded-md z-10 outline-none">
                     {#each suggestions as suggestion}
-                        <option class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(suggestion)}>
+                        <option class="p-2 hover:bg-[#131217] cursor-pointer"  on:click={() => selectSuggestion(suggestion)}>
                         {suggestion}
                         </option>
                     {/each}
                     </ul>
                 {/if}
             </div>
-            <h2 class="text-xl w-[80%] mt-[5vh] mb-[3vh]">Model</h2>
-            <div class="w-[80%]">
-                <select class="border-2 flex justify-center items-center w-[50%] rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" bind:value={model}>
+            <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">Model</h2>
+            <div class="w-[40%]">
+                <select class="border-2 flex justify-center items-center w-[40%] rounded h-[4vh] bborder-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" bind:value={model}>
                     {#each models as mod}
                     <option class="text-sm rounded" value={mod}>{mod}</option>
                     {/each}
                 </select>
             </div>
-            <div class="w-[80%]">
-                <button class="mt-[5vh] py-[10px] px-[30px] text-xl rounded-md bg-white ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+            <div class="w-[40%]">
+                <button class="mt-[5vh] py-[10px] px-[30px] text-xl rounded-md hover:bg-[#2b2c30] ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             </div>
 
         </div>
         <div class="flex items-center justify-center pt-[10vh]">
-            <div class="programming-stats h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-                <canvas class="w-[50vh] first-line-chart"></canvas>
+            <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
+                <canvas class="w-[60vw] first-line-chart"></canvas>
             </div>
         </div>
         
@@ -480,7 +480,15 @@
 <style>
 
 .reg-page{
-    grid-template-columns: 15vw 85vw;
+    grid-template-columns: 30vw 70vw;
+    /* background: #1b1b1b; */
+    background: #1b1b1b; 
+    background-image: 
+        radial-gradient(circle at 30% 40%, rgba(50, 50, 50, 0.1), transparent 70%),
+        radial-gradient(circle at 70% 60%, rgba(70, 70, 70, 0.08), transparent 80%),
+        linear-gradient(45deg, rgba(50, 50, 50, 0.2), rgba(90, 90, 90, 0.05)),
+        linear-gradient(135deg, rgba(27, 27, 27, 0.9), transparent 80%);
+    background-blend-mode: screen, overlay;
 }
 
 .programming-stats {
@@ -491,7 +499,7 @@
     gap: 24px;
     margin: 0 auto;
     /* width: fit-content; */
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3);
     border-radius: 20px;
     padding: 8px 32px;
     color: #023047;
