@@ -383,10 +383,10 @@
 
     </div>
     {#if submit}
-    <div class="w-screen items-center">
-        <h1 class="text-2xl mt-[15vh] text-center">OLS Regression Results</h1>
-        <div class="grid grid-cols-2 mb-[15vh]">
-            <div class="flex flex-col items-center">
+    <div class="w-screen items-center bg-[#0e0f13]">
+        <h1 class="text-xl text-[#C0C0C0] text-center">OLS Regression Results</h1>
+        <div class="flex flex-col items-center">
+            <!-- <div class="flex flex-col items-center">
             
                 <div class="grid grid-cols-2 grid-rows-9 w-[40vw] mt-[10vh] gap-[1vw]">
                     <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Dep. Variable: </p></div><div class="mr-[10%]"><p>{summary["Dep. Variable"]}</p></div></div>
@@ -432,8 +432,74 @@
                         </tbody>
                     </table>
                 </div>
+            </div> -->
+            <div class="w-[60vw] text-gray-100 p-8">
+                <div class="max-w-7xl mx-auto">
+                  <div class="grid grid-cols-4 gap-4 mb-12">
+                    {#each Object.entries(summary) as [key, value]}
+                      <div class="bg-[#242627] rounded-lg shadow-lg p-4 flex justify-between items-center">
+                        <p class="text-xs text-gray-400">{key}</p>
+                        <p class="text-xs text-[#C0C0C0]">{value}</p>
+                      </div>
+                    {/each}
+                  </div>
+              
+                  
+                </div>
             </div>
-            <div class="flex flex-col items-center">
+            <div class="w-[60vw] bg-[#242627] overflow-x-auto rounded-lg shadow-lg p-4">
+                <table class="w-full">
+                  <thead>
+                    <tr class="border-b text-gray-400 border-gray-700">
+                      <th class="p-2 text-left"></th>
+                      <th class="p-2 text-center">coef</th>
+                      <th class="p-2 text-center">std err</th>
+                      <th class="p-2 text-center">t</th>
+                      <th class="p-2 text-center">P>|t|</th>
+                      <th class="p-2 text-center">[0.025]</th>
+                      <th class="p-2 text-center">[0.975]</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {#each Object.entries(mid_values) as [rowKey, values]}
+                      <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors duration-200">
+                        <th class="p-2 text-gray-400 text-left font-medium">{rowKey}</th>
+                        {#each values as value}
+                          <td class="p-2 text-sm text-center text-[#C0C0C0]">{value}</td>
+                        {/each}
+                      </tr>
+                    {/each}
+                  </tbody>
+                </table>
+            </div>
+            <div class="w-[60vw] flex flex-col text-gray-100 p-8">
+                <div class="w-full max-w-4xl mx-auto mt-10">
+                  <table class="w-full bg-[#242627] rounded-lg shadow-lg overflow-hidden">
+                    <thead>
+                      <tr class=" text-gray-400 bg-gray-700">
+                        <th class="p-4 text-left"></th>
+                        <th class="p-4 text-center"><p class="text-sm">Av. Ann. Excess Return</p></th>
+                        <th class="p-4 text-center"><p class="text-sm">Return Contribution</p></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {#each Object.entries(tbl_summary) as [rowKey, rowValue]}
+                        <tr class="border-t border-gray-700 hover:bg-gray-750 transition-colors duration-200">
+                          <th class="p-4 text-left text-sm text-gray-400">{rowKey}</th>
+                          {#each Object.values(rowValue) as cellValue}
+                            <td class="p-4 text-center">
+                              <div class=" py-2 px-4">
+                                <p class=" font-semibold text-[#C0C0C0] text-sm">{cellValue}</p>
+                              </div>
+                            </td>
+                          {/each}
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            <!-- <div class="flex flex-col items-center">
                 <div class="grid grid-cols-2 grid-rows-4 w-[40vw] mt-[10vh] gap-[1vw]">
                     <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Omnibus: </p></div><div class="mr-[10%]"><p>{summary["Omnibus"]}</p></div></div>
                     <div class="data-item shadow-lg h-[5vh] items-center flex justify-between"><div class="ml-[10%]"><p>Durbin-Watson: </p></div><div class="mr-[10%]"><p>{summary["Durbin-Watson"]}</p></div></div>
@@ -467,7 +533,9 @@
                 </div>
                 
 
-            </div>
+            </div> -->
+
+            
         </div>
 
         
@@ -482,13 +550,13 @@
 .reg-page{
     grid-template-columns: 30vw 70vw;
     /* background: #1b1b1b; */
-    background: #1b1b1b; 
-    background-image: 
+    background: linear-gradient(to bottom, #181818, #0e0f13);
+    /* background-image: 
         radial-gradient(circle at 30% 40%, rgba(50, 50, 50, 0.1), transparent 70%),
         radial-gradient(circle at 70% 60%, rgba(70, 70, 70, 0.08), transparent 80%),
         linear-gradient(45deg, rgba(50, 50, 50, 0.2), rgba(90, 90, 90, 0.05)),
         linear-gradient(135deg, rgba(27, 27, 27, 0.9), transparent 80%);
-    background-blend-mode: screen, overlay;
+    background-blend-mode: screen, overlay; */
 }
 
 .programming-stats {

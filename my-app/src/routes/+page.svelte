@@ -654,7 +654,7 @@
             <canvas class="w-[55vw] min-w-[400px] combo-chart"></canvas>
         </div>
     </div>
-    <div class="rounded-t-[150px] bg-[#111111] w-[100vw] text-[#C0C0C0] mb-[15vh] pt-[15vh]">
+    <div class="rounded-t-[150px] bg-[#111111] w-[100vw] text-[#C0C0C0] pt-[15vh]">
         <div class="grid grid-cols-2 gap-[5vw] justify-self-center justify-center align-center">
         
             <div>

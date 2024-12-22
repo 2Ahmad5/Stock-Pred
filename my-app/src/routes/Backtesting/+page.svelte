@@ -227,13 +227,7 @@
             endMonth = `${months[endMonth]}`
         }
         items = inputValues
-        // for (let value of inputValues) {
-        //     // @ts-ignore
-        //     if (value.trim() !== "") {
-        //         // @ts-ignore
-        //         items = [...items, value.trim()];
-        //     }
-        // }
+
 
         console.log(allocations1)
 
@@ -245,7 +239,7 @@
 
     async function processInput() {
         try{
-            await axios.post('/regres', {
+            await axios.post('http://127.0.0.1:5000/regres', {
 
                 ticker_list: items,
                 start: Number(`${startYear}${startMonth}`),
