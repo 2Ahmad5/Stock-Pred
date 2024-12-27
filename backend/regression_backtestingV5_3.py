@@ -360,7 +360,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
             plt.plot(output[p]['dates_aux'], output[p]['pv'], label=portfolio_name[p], linewidth=2.5)
     plt.legend(loc='upper left')
     plt.title('Portfolio Growth')
-    plt.show()
+    # plt.show()
 
     # print(portfolio_growths)
 
@@ -450,7 +450,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
     plt.ylabel('Annual Returns (%)')
     plt.legend(loc='best')
     plt.title('Annual Returns by Portfolio')
-    plt.show()
+    # plt.show()
 
 
 
@@ -484,7 +484,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
     plt.title('Drawdowns')
     plt.legend()
-    plt.show()
+    # plt.show()
 
     # print(drawdown_data)
 

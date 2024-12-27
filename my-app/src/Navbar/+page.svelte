@@ -1,22 +1,31 @@
 
 <script>
+    
     let y;
+    let currentPath = "";
+
+    $: {
+        if (typeof window !== "undefined") {
+            currentPath = window.location.pathname;
+        }
+    }
+
+    function isActive(path) {
+        return currentPath === path ? 'text-[#5ce07f]' : 'text-[#D3D3D3]';
+    }
 </script>
 
 <body>
-    <div class="navbar {y < 50 ? 'h-[10vh]' : 'h-[7vh]'}">
+<div class="navbar h-[10vh]">
 
-        <div>
-            Logo/Name goes here
-        </div>
-        <div class="flex gap-[2vh] w-[90%] items-center justify-between text-[#D3D3D3] text-lg">
-            <a class="hover:text-white ease-in-out duration-200">Home</a>
-            <a class="hover:text-white">Mean-variance</a>
-            <a href="/Regression" class="hover:text-white">Regression</a>
-            <a href="/Backtesting" class="hover:text-white">Backtesting</a>
-            <a href="/FAQ" class="hover:text-white">FAQ</a>
-        </div>
+    <div class="options flex gap-[2vw] w-fit items-center justify-center text-[#D3D3D3] text-base px-[25px]">
+        <a class="hover:text-[#5ce07f] ease-in-out duration-200 {isActive('/')}" href="/">Home</a>
+        <a class="hover:text-[#5ce07f] {isActive('/Mean')}" href="/Mean">Mean-variance</a>
+        <a class="hover:text-[#5ce07f] {isActive('/Regression')}" href="/Regression" >Regression</a>
+        <a class="hover:text-[#5ce07f] {isActive('/Backtesting')}" href="/Backtesting">Backtesting</a>
+        <a class="hover:text-[#5ce07f] {isActive('/FAQ')}" href="/FAQ">FAQ</a>
     </div>
+</div>
 </body>
 
 <svelte:window bind:scrollY={y}/>
@@ -39,7 +48,7 @@
         left: 0;
         bottom: 0;
         width: 0;
-        background: white;
+        background: #5ce07f;
         transition: width .2s;
     }
 
@@ -54,7 +63,18 @@
         /* height: 10vh; */
         transition: height .6s;
         display: grid;
-        grid-template-columns: 55vw 45vw;
-        background: black;
+        align-items: center;
+        justify-content: center;
+        /* background: black; */
+    }
+
+    .options{
+        height: 50%;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(6.9px);
+        -webkit-backdrop-filter: blur(6.9px);
+
     }
 </style>

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "flowbite-svelte": "^0.47.4",
     "pandas": "^0.0.3"
   }
 }

@@ -285,7 +285,7 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
 
         fig.tight_layout()  
         fig.legend([f'Alpha'] + factor_names, loc='lower right', ncol=n_factors+1)
-        plt.show()
+        # plt.show()
 
         
         return line_graph_1, line_2, line_3, line_4, line_5, line_6, summary_data, return_table, middle_titles, middle_values

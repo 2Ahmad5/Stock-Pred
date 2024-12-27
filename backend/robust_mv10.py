@@ -235,7 +235,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 # Equal aspect ratio ensures that pie is drawn as a circle
                 ax.axis('equal')
                 plt.title(f'Max Sharpe Ratio Portfolio Weights, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
-                plt.show()
+                # plt.show()
 
             # Plot
             gl = min(min(stdlist), min(stddf)) * 0.7 * np.sqrt(12)
@@ -304,7 +304,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             plt.xlim(gl, gr)
             plt.ylim(gb, gu)
             plt.title(f'Standard MV Portfolio, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
-            plt.show()
+            # plt.show()
 
             if not short: 
                 colors = ['orange', 'blue', 'green', 'red', 'purple', 'cyan', 'magenta', 'yellow']
@@ -337,7 +337,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
                 plt.xlabel('Standard Deviation')
                 plt.ylabel('Allocation')
                 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=len(etflist))
-                plt.show()
+                # plt.show()
             
             print("Efficient Frontier Portfolios:")
             
@@ -460,7 +460,7 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             # Equal aspect ratio ensures that pie is drawn as a circle
             ax.axis('equal')
             plt.title(f'Robust Max Sharpe Ratio Portfolio Weights, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
-            plt.show()
+            # plt.show()
 
             stddf = stddf * np.sqrt(12)
             meandf = meandf * 12 
@@ -488,12 +488,10 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
 
 
 
-
-
-            plt.scatter(stddf, meandf, color='purple', marker='o', s=40)
-            for i in range(len(etflist)): 
-                plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
-            plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
+            # plt.scatter(stddf, meandf, color='purple', marker='o', s=40)
+            # for i in range(len(etflist)): 
+            #     plt.annotate(etflist[i], (stddf[i], meandf[i]), textcoords="offset points", xytext=(0,10), ha='center')
+            # plt.scatter(maxSR_std, maxSR_ret, color='red', marker='*', s=110)
 
 
             # edited
@@ -518,25 +516,22 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             }
             mixed_data_scatter.append(dataset)
 
-
-
-
-            plt.text(maxSR_std, maxSR_ret, s="MVP", horizontalalignment='right', verticalalignment='top', fontsize=10)
-            plt.gca().set_xlim(left=0)
-            plt.gca().set_ylim(bottom=0)
-            plt.xlim(gl, gr)
-            plt.ylim(gb, gu)
-            plt.title(f'Robust MV Portfolio, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
-            plt.show()
+            # plt.text(maxSR_std, maxSR_ret, s="MVP", horizontalalignment='right', verticalalignment='top', fontsize=10)
+            # plt.gca().set_xlim(left=0)
+            # plt.gca().set_ylim(bottom=0)
+            # plt.xlim(gl, gr)
+            # plt.ylim(gb, gu)
+            # plt.title(f'Robust MV Portfolio, {shortchoice} Short Selling, Date Range: {startdate}-{enddate}')
+            # plt.show()
 
             colors = ['orange', 'blue', 'green', 'red', 'purple', 'cyan', 'magenta', 'yellow']
-            colorlist = colors[:len(etflist)]
-            fig, ax = plt.subplots(figsize=(12, 6))
-            bottom = np.zeros_like(efstd) 
+            # colorlist = colors[:len(etflist)]
+            # fig, ax = plt.subplots(figsize=(12, 6))
+            # bottom = np.zeros_like(efstd) 
             allocations = pd.DataFrame(simwdf, columns = etflist)
-            for i, e in enumerate(allocations.columns):
-                ax.fill_between(efstd, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
-                bottom += allocations[e]  
+            # for i, e in enumerate(allocations.columns):
+            #     ax.fill_between(efstd, bottom, bottom + allocations[e], label = e, color=colorlist[i], alpha=0.5)
+            #     bottom += allocations[e]  
 
 
             # edited
@@ -555,11 +550,11 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
 
 
 
-            plt.title(f'Robust Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
-            plt.xlabel('Standard Deviation')
-            plt.ylabel('Allocation')
-            plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=len(etflist))
-            plt.show()
+            # plt.title(f'Robust Efficient Frontier Transition Map, Date Range: {startdate}-{enddate}')
+            # plt.xlabel('Standard Deviation')
+            # plt.ylabel('Allocation')
+            # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=len(etflist))
+            # plt.show()
 
             print("Robust Efficient Frontier Portfolios:")
             

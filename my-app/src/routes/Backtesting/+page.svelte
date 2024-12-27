@@ -23,7 +23,7 @@
     } from 'chart.js';
     import 'chartjs-adapter-date-fns';
 
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import * as Table from "$lib/components/ui/table";
 
 
     Chart.register(BarController, BarElement, DoughnutController, TimeScale, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
@@ -102,11 +102,9 @@
         if (storedEtfList) {
             etflist = storedEtfList;
 
-            console.log(etflist);
         }else{ 
             const response = await fetchCsv('/ETF_tickers_only.csv');
             etflist = response;
-            console.log(etflist)
 
             await db.put('keyval', etflist, 'etfList');
         }
@@ -211,8 +209,13 @@
     function updateSuggestions(index, value) {
         inputValues[index] = value;
         suggestions[index] = etflist
-        .filter(ticker => ticker.toLowerCase().includes(value.toLowerCase()))
+        .filter(ticker => ticker.toLowerCase().startsWith(value.toLowerCase()))
         .slice(0, 3);
+    }
+
+    function selectSuggestion(index, suggestion) {
+        inputValues[index] = suggestion;
+        suggestions[index] = [];
     }
 
     const handleSubmit = () => {
@@ -227,9 +230,6 @@
             endMonth = `${months[endMonth]}`
         }
         items = inputValues
-
-
-        console.log(allocations1)
 
         benchmarks.push(benchmark);
         
@@ -257,9 +257,6 @@
                 })
             }).then((response) => {
                 results = response.data
-                
-                console.log(results)
-                // console.log(nothing)
                 port_allocations = results.port_allocations
                 drawdown_print = {};
                 for (const key in results.drawdown_print) {
@@ -274,9 +271,7 @@
                 }
                 regression_analysis = results.regression_analysis
                 metrics = metrics = Object.keys(regression_analysis[Object.keys(regression_analysis)[0]].alpha);
-                console.log(port_allocations)
-                console.log(drawdown_print)
-                console.log(regression_analysis)
+
                 nothing = false;
                 updateChart(results.portfolio_growths, results.annual_returns_data, results.drawdown_data)
 
@@ -427,78 +422,78 @@
 
 <body>
     <Navbar/>
-    <div class="w-[100vw] pt-[10vh] h-[25vh] bg-[#5ce07f] grid grid-cols-6">
-        <div class="col-span-2 flex flex-col justify-center items-center">
-            <h2 class="text-2xl mb-[3vh]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
-            <div class="grid grid-cols-4 w-[90%] gap-[2vw]">
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startYear}>
+    <div class=" pt-[10vh] h-[25vh] bg-[#181818] text-[#C0C0C0] flex  justify-center gap-[2vw]">
+        <div class=" col-span-2 flex flex-col justify-end items-center">
+            <h2 class="text-lg mb-[3vh] px-[1vw]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
+            <div class="grid grid-cols-4 w-full gap-[1vw]">
+                <select class=" border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={startMonth}>
+                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
                 </select>
                 
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endYear}>
+                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="year-picker" bind:value={endMonth}>
+                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
                 </select>
             </div>
         </div>
-        <div class="flex flex-col justify-center items-center">
-            <h2 class="text-2xl mb-[3vh]">Rebalancing</h2>
-            <select class="border-2 flex justify-center items-center rounded h-[4vh] border-[#696a6b] text-xl pl-[5%]" id="balance-picker" bind:value={rebalance}>
+        <div class="flex flex-col justify-end items-center">
+            <h2 class="text-lg mb-[3vh]">Rebalancing</h2>
+            <select class="border-2  flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[2%]" id="balance-picker" bind:value={rebalance}>
                 {#each balances as balance}
                 <option class="text-sm rounded" value={balance}>{balance}</option>
                 {/each}
             </select>
         </div>
-        <div class="flex flex-col justify-center items-center">
-            <h2 class="text-2xl mb-[3vh]">Start Balance</h2>
-            <input class="border-2 flex justify-center items-center rounded w-[50%] h-[4vh] border-[#696a6b] text-xl pl-[2%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
+        <div class="flex flex-col justify-end items-center w-[7vw]">
+            <h2 class="text-lg mb-[3vh]">Start Balance</h2>
+            <input class="border-2 flex justify-center items-center w-[90%] rounded  hover:border-[#5ce07f] h-[4vh] text-sm border-[#696a6b] bg-[#2c2e2f] pl-[5%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
 
         </div>
-        <div class="flex flex-col justify-center items-center">
-            <h2 class="text-2xl mb-[3vh]">Benchmark</h2>
-            <input class="border-2 flex justify-center items-center rounded w-[50%] h-[4vh] border-[#696a6b] text-xl pl-[2%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
+        <div class="flex flex-col justify-end items-center w-[7vw]">
+            <h2 class="text-lg mb-[3vh]">Benchmark</h2>
+            <input class="border-2 flex justify-center items-center rounded w-[90%] hover:border-[#5ce07f] h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-sm pl-[5%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
 
         </div>
-        <div class="flex flex-col justify-center items-center">
-            <button class="py-[10px] px-[30px] text-xl rounded-md bg-white ease-in-out duration-150 border-2 border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+        <div class="flex flex-col justify-end items-end">
+            <button class="py-[10px] px-[30px] text-black text-xl rounded-md border-[#5ce07f] bg-[#5ce07f] ease-in-out duration-150 border-2 hover:bg-[#282828] hover:text-[#C0C0C0] hover:border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
 
         </div>
 
     </div>
-    <div class="flex">
-        <div class="w-[30%] h-[75vh] bg-[#5ce07f] flex flex-col items-center justify-center pl-[2vw]">
-            <div class="tickers mb-[3vh]">
-                <h2 class="text-2xl mb-[1vh]">Ticker Symbols</h2>
-                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh] w-[95%]">
+    <div class="flex text-[#C0C0C0] bg-[#181818]">
+        <div class="w-[40%] h-[75vh] flex flex-col justify-center">
+            <div class="tickers mb-[3vh] pl-[25%]">
+                <h2 class="text-lg mb-[1vh] w-full">Ticker Symbols</h2>
+                <div class="grid grid-rows-2 grid-cols-5 gap-[1.5vh] ">
             
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] hover:border-[#5ce07f] border-2 text-sm border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
                             type="text"
-                            placeholder="Place ticker here..."
+                            placeholder="Place ticker..."
                             bind:value={inputValues[index]}
                             on:input={(e) => updateSuggestions(index, e.target.value)}
                             on:focus={() => handleFocus(index)}
-                            on:blur={() => setTimeout(() => handleBlur(index), 500)}
+                            on:blur={() => setTimeout(() => handleBlur(index), 150)}
                         >
                         {#if isFocused[index] && suggestions[index].length > 0}
-                            <ul class="absolute bg-white border border-gray-300 w-full mt-1 rounded-md z-10 outline-none">
+                            <ul class="absolute bg-[#2c2e2f] border border-gray-300 w-full mt-1 border-[#5ce07f] rounded-md z-10 outline-none">
                             {#each suggestions[index] as suggestion}
-                                <option class="p-2 hover:bg-gray-200 cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
+                                <option class="p-2 rounded-md hover:bg-[#131217] cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
                                 {suggestion}
                                 </option>
                             {/each}
@@ -510,14 +505,14 @@
                 </div>
                 
             </div>
-            <div class="tickers mb-[3vh]">
-                <h2 class="text-2xl mb-[1vh]">Allocation 1</h2>
-                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh] w-[95%]">
+            <div class="tickers mb-[3vh] pl-[25%]">
+                <h2 class="text-lg mb-[1vh]">Allocation 1</h2>
+                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh]">
             
                     {#each allocations1 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] border-2 hover:border-[#5ce07f] text-sm border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations1[index]}
@@ -528,14 +523,14 @@
     
                 </div>
             </div>
-            <div class="tickers mb-[3vh]">
-                <h2 class="text-2xl mb-[1vh]">Allocation 2</h2>
-                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh] w-[95%]">
+            <div class="tickers mb-[3vh] pl-[25%]">
+                <h2 class="text-lg mb-[1vh]">Allocation 2</h2>
+                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh]">
             
                     {#each allocations2 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm hover:border-[#5ce07f] border-2 border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations2[index]}
@@ -546,14 +541,14 @@
     
                 </div>
             </div>
-            <div class="tickers mb-[3vh]">
-                <h2 class="text-2xl mb-[1vh]">Allocation 3</h2>
-                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh] w-[95%]">
+            <div class="tickers mb-[3vh] pl-[25%]">
+                <h2 class="text-lg mb-[1vh]">Allocation 3</h2>
+                <div class="grid grid-rows-2 grid-cols-5 gap-[2vh]">
             
                     {#each allocations3 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 border-[#696a6b] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm border-2 hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations3[index]}
@@ -567,101 +562,105 @@
     
         </div>
         {#if !nothing}
-        <div class="w-[70%] pl-[2vw] h-[75vh] justify-center align-center">
-            <h1 class="text-4xl mb-[5vh] text-center">Portfolio Growths</h1>
-            <div class="programming-stats max-h-[65vh] w-[65vw] min-w-[400px]">
-                <canvas class="w-[65vw] min-w-[400px] growth-chart"></canvas>
+        <div class="w-[60%] pl-[2vw] h-[75vh] flex flex-col justify-center align-center">
+            <h1 class="text-xl mb-[5vh] text-center">Portfolio Growths</h1>
+            <div class="programming-stats max-h-[65vh] w-[55vw] min-w-[400px]">
+                <canvas class="w-[45vw] min-w-[400px] growth-chart"></canvas>
             </div>
         </div>
         {/if}
     </div>
     {#if !nothing}
-        <div class="w-full h-[100vh] justify-center align-center">
-            <h1 class="text-4xl mb-[5vh] text-center">Annual Returns</h1>
-            <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-                <canvas class="w-[75vw] min-w-[400px] annual-returns-chart"></canvas>
+        <div class="w-full h-[100vh] border-t-[#313131] bg-[#1c1c1c] flex flex-col border-t-[5px] justify-center align-center">
+            <h1 class="text-xl mb-[5vh] text-[#C0C0C0] text-center">Annual Returns</h1>
+            <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
+                <canvas class="w-[55vw] min-w-[400px] annual-returns-chart"></canvas>
             </div>
         </div>
-        <div class="w-full h-[100vh] justify-center align-center">
-            <h1 class="text-4xl mb-[5vh] text-center">Drawdown Data</h1>
-            <div class="programming-stats max-h-[80vh] w-[80vw] min-w-[400px] p-[5vh]">
-                <canvas class="w-[75vw] min-w-[400px] drawdown-chart"></canvas>
+        <div class="w-full h-[100vh] text-[#C0C0C0] bg-[#1c1c1c] flex flex-col justify-center align-center">
+            <h1 class="text-xl mb-[5vh] text-center">Drawdown Data</h1>
+            <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
+                <canvas class="w-[55vw] min-w-[400px] drawdown-chart"></canvas>
             </div>
         </div>
     {/if}
     {#if port_allocations}
-    <h1 class="text-4xl mb-[5vh] text-center">Portfolio Allocation</h1>
-    <div class="w-[70%] h-[30vh] grid grid-cols-3 justify-self-center ">
-        {#each Object.keys(port_allocations) as i}
-            <div class="flex flex-col justify-center">
-                <h1 class="text-2xl mb-[4vh]">{i}</h1>
-                <div class="flex flex-col">
-                    {#each Object.keys(port_allocations[i]) as j}
-                    <div class="flex gap-[5vw] mb-[2vh]">
-                        <p>{j}</p>
-                        <p>{port_allocations[i][j]}</p>
+    <div class="bg-[#1c1c1c] text-[#C0C0C0]">
+        <h1 class="text-xl mb-[5vh] text-center">Portfolio Allocation</h1>
+        <div class="w-[70%] h-[30vh] grid grid-cols-3 justify-self-center ">
+            {#each Object.keys(port_allocations) as i}
+                <div class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[15vw] gap-[2vh] border-2 border-[#262629] shadow-lg bg-[#1c1c1f]">
+                    <h1 class="w-full border-b border-gray-700 py-4 text-xl">{i}</h1>
+                    <div class="flex flex-col">
+                        {#each Object.keys(port_allocations[i]) as j}
+                        <div class=" text-sm grid grid-cols-2 gap-[5vw] mb-[2vh]">
+                            <p>{j}</p>
+                            <p>{port_allocations[i][j]}</p>
+                        </div>
+                        {/each}
                     </div>
-                    {/each}
                 </div>
-            </div>
-        {/each}
-    </div>
-
-    <h1 class="text-4xl mb-[5vh] text-center">Top 3 Drawdowns</h1>
-    <div class="w-[70%] justify-self-center">
-        {#each Object.keys(drawdown_print) as d}
-        <h2 class="mb-[2vh] mt-[4vh] font-bold text-center">Top 3 drawdowns {d}</h2>
-        <Table noborder={true} class="rounded-lg">
-            <TableHead>
-                {#each Object.keys(drawdown_print[d]) as k}
-                    <TableHeadCell>{k}</TableHeadCell>
-                {/each}
-            </TableHead>
-            <TableBody>
-                {#each Array.from({ length: drawdown_print[d]['Rank'].length }) as _, i}
-                <TableBodyRow>
-                    {#each Object.keys(drawdown_print[d]) as j}
-                        <TableBodyCell>{drawdown_print[d][j][i]}</TableBodyCell>
-                    {/each}
-                </TableBodyRow>
-                {/each}
-            </TableBody>
-        </Table>
-        {/each}
-    </div>
-
-    <h1 class="text-4xl mb-[5vh] mt-[10vh] text-center">Regression Analysis</h1>
-    <div class="w-[70%] justify-self-center">
-        {#each Object.keys(regression_analysis) as category}
-            <h2 class="text-lg font-semibold mt-4 text-center">Regression Analysis {category}</h2>
-            <div class="grid grid-cols-4">
-                <h2>R Square: {regression_analysis[category]["R-squared"]}</h2>
-                <h2>Adjusted R Square: {regression_analysis[category]["Adjusted R-squared"]}</h2>
-                <h2>Observations: {regression_analysis[category]["Observations"]}</h2>
-                <h2>Annualized Alpha: {regression_analysis[category]["Annualized alpha"].toFixed(6)}</h2>
-            </div>
-            <Table noborder={true}>
-                <TableHead >
-                    <TableHeadCell></TableHeadCell>
-                    {#each metrics as metric}
-                        <TableHeadCell>{metric}</TableHeadCell>
-                    {/each}
                 
-                </TableHead>
-                <TableBody>
-                    {#each ['alpha', 'beta'] as subcategory}
-                        <TableBodyRow>
-                            <TableBodyCell class="font-semibold">{subcategory}</TableBodyCell>
-                            {#each metrics as metric}
-                                <!-- Use .toFixed(6) to round to 6 decimal places -->
-                                <TableBodyCell>{regression_analysis[category][subcategory][metric].toFixed(6)}</TableBodyCell>
-                            {/each}
-                        </TableBodyRow>
+            {/each}
+        </div>
+       
+    
+        <h1 class="text-xl mb-[5vh] mt-[10vh] text-center">Top 3 Drawdowns</h1>
+        <div class="w-[70%] justify-self-center">
+            {#each Object.keys(drawdown_print) as d}
+            <Table.Root class="rounded-lg mb-[5vh]">
+                <Table.Caption>Top 3 drawdowns {d}</Table.Caption>
+                <Table.Header>
+                    {#each Object.keys(drawdown_print[d]) as k}
+                        <Table.Head>{k}</Table.Head>
                     {/each}
-                </TableBody>
-            </Table>
-        {/each}
+                </Table.Header>
+                <Table.Body>
+                    {#each Array.from({ length: drawdown_print[d]['Rank'].length }) as _, i}
+                    <Table.Row>
+                        {#each Object.keys(drawdown_print[d]) as j}
+                            <Table.Cell>{drawdown_print[d][j][i]}</Table.Cell>
+                        {/each}
+                    </Table.Row>
+                    {/each}
+                </Table.Body>
+            </Table.Root>
+            {/each}
+        </div>
+        <h1 class="text-xl mb-[5vh] mt-[10vh] text-center">Regression Analysis</h1>
+        <div class="w-[70%] justify-self-center">
+            {#each Object.keys(regression_analysis) as category}
+                <!-- <h2 class="text-lg font-semibold mt-4 text-center">Regression Analysis {category}</h2>
+                <div class="grid grid-cols-4">
+                    <h2>R Square: {regression_analysis[category]["R-squared"]}</h2>
+                    <h2>Adjusted R Square: {regression_analysis[category]["Adjusted R-squared"]}</h2>
+                    <h2>Observations: {regression_analysis[category]["Observations"]}</h2>
+                    <h2>Annualized Alpha: {regression_analysis[category]["Annualized alpha"].toFixed(6)}</h2>
+                </div> -->
+                <Table.Root class="mb-[5vh]">
+                    <Table.Caption>Regression Analysis {category} | R Square: {regression_analysis[category]["R-squared"]} | Adjusted R Square: {regression_analysis[category]["Adjusted R-squared"]} | Observations: {regression_analysis[category]["Observations"]} | Annualized Alpha: {regression_analysis[category]["Annualized alpha"].toFixed(6)}</Table.Caption>
+                    <Table.Header>
+                        <Table.Head></Table.Head>
+                        {#each metrics as metric}
+                            <Table.Head>{metric}</Table.Head>
+                        {/each}
+                    
+                    </Table.Header>
+                    <Table.Body>
+                        {#each ['alpha', 'beta'] as subcategory}
+                            <Table.Row>
+                                <Table.Cell class="font-semibold">{subcategory}</Table.Cell>
+                                {#each metrics as metric}
+                                    <Table.Cell>{regression_analysis[category][subcategory][metric].toFixed(6)}</Table.Cell>
+                                {/each}
+                            </Table.Row>
+                        {/each}
+                    </Table.Body>
+                </Table.Root>
+            {/each}
+        </div>
     </div>
+    
    
     
     {/if}
@@ -673,7 +672,7 @@
 </body>
 
 <style>
-
+@import '../../app.css';
 .programming-stats {
     font-family: 'Rubik', sans-serif;
     display: flex;
@@ -681,11 +680,13 @@
     gap: 24px;
     margin: 0 auto;
     /* width: fit-content; */
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
+    /* box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3); */
     border-radius: 20px;
+    border-width: 2px;
+    border-color: #2b3135;
     padding: 8px 32px;
-    color: #023047;
     transition: all 400ms ease;
+    /* background-color: #2e3233; */
 }
 .programming-stats:hover {
     transform: scale(1.02);
