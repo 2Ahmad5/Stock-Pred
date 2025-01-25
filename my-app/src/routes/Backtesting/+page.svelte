@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
     import Navbar from "../../Navbar/+page.svelte";
     import axios from 'axios';
@@ -24,6 +24,23 @@
     import 'chartjs-adapter-date-fns';
 
     import * as Table from "$lib/components/ui/table";
+
+    import CalendarIcon from "lucide-svelte/icons/calendar";
+    import {
+        type DateValue,
+        DateFormatter,
+        getLocalTimeZone,
+    } from "@internationalized/date";
+    import { cn } from "$lib/utils.js";
+    import { Button } from "$lib/components/ui/button";
+    import { Calendar } from "$lib/components/ui/calendar";
+    import * as Popover from "$lib/components/ui/popover";
+    
+    const df = new DateFormatter("en-US", {
+        dateStyle: "long",
+    });
+    
+    let value: DateValue | undefined = undefined;
 
 
     Chart.register(BarController, BarElement, DoughnutController, TimeScale, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
@@ -422,10 +439,48 @@
 
 <body>
     <Navbar/>
-    <div class=" pt-[10vh] h-[25vh] bg-[#181818] text-[#C0C0C0] flex  justify-center gap-[2vw]">
+    <div class=" pt-[10vh] h-[25vh] text-black flex  justify-center gap-[2vw]">
         <div class=" col-span-2 flex flex-col justify-end items-center">
             <h2 class="text-lg mb-[3vh] px-[1vw]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
-            <div class="grid grid-cols-4 w-full gap-[1vw]">
+            <div class="flex gap-[2vw]">
+            <Popover.Root>
+                <Popover.Trigger asChild let:builder>
+                  <Button
+                    variant="outline"
+                    class={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !value && "text-muted-foreground"
+                    )}
+                    builders={[builder]}
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content class="w-auto p-0" align="start">
+                  <Calendar bind:value />
+                </Popover.Content>
+              </Popover.Root>
+              <Popover.Root>
+                <Popover.Trigger asChild let:builder>
+                  <Button
+                    variant="outline"
+                    class={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !value && "text-muted-foreground"
+                    )}
+                    builders={[builder]}
+                  >
+                    <CalendarIcon class="mr-2 h-4 w-4" />
+                    {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
+                  </Button>
+                </Popover.Trigger>
+                <Popover.Content class="w-auto p-0" align="start">
+                  <Calendar bind:value />
+                </Popover.Content>
+              </Popover.Root>
+            </div>
+            <!-- <div class="grid grid-cols-4 w-full gap-[1vw]">
                 <select class=" border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
@@ -447,11 +502,11 @@
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
                 </select>
-            </div>
+            </div> -->
         </div>
         <div class="flex flex-col justify-end items-center">
             <h2 class="text-lg mb-[3vh]">Rebalancing</h2>
-            <select class="border-2  flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[2%]" id="balance-picker" bind:value={rebalance}>
+            <select class="border-2  flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] text-base pl-[2%]" id="balance-picker" bind:value={rebalance}>
                 {#each balances as balance}
                 <option class="text-sm rounded" value={balance}>{balance}</option>
                 {/each}
@@ -459,12 +514,12 @@
         </div>
         <div class="flex flex-col justify-end items-center w-[7vw]">
             <h2 class="text-lg mb-[3vh]">Start Balance</h2>
-            <input class="border-2 flex justify-center items-center w-[90%] rounded  hover:border-[#5ce07f] h-[4vh] text-sm border-[#696a6b] bg-[#2c2e2f] pl-[5%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
+            <input class="border-2 flex justify-center items-center w-[90%] rounded  hover:border-[#5ce07f] h-[4vh] text-sm border-[#696a6b]  pl-[5%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
 
         </div>
         <div class="flex flex-col justify-end items-center w-[7vw]">
             <h2 class="text-lg mb-[3vh]">Benchmark</h2>
-            <input class="border-2 flex justify-center items-center rounded w-[90%] hover:border-[#5ce07f] h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-sm pl-[5%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
+            <input class="border-2 flex justify-center items-center rounded w-[90%] hover:border-[#5ce07f] h-[4vh] border-[#696a6b] text-sm pl-[5%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
 
         </div>
         <div class="flex flex-col justify-end items-end">
@@ -473,7 +528,7 @@
         </div>
 
     </div>
-    <div class="flex text-[#C0C0C0] bg-[#181818]">
+    <div class="flex text-black">
         <div class="w-[40%] h-[75vh] flex flex-col justify-center">
             <div class="tickers mb-[3vh] pl-[25%]">
                 <h2 class="text-lg mb-[1vh] w-full">Ticker Symbols</h2>
@@ -482,7 +537,7 @@
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] hover:border-[#5ce07f] border-2 text-sm border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] hover:border-[#5ce07f] border-2 text-sm border-[#696a6b]  rounded-md outline-none"
                             type="text"
                             placeholder="Place ticker..."
                             bind:value={inputValues[index]}
@@ -512,7 +567,7 @@
                     {#each allocations1 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 hover:border-[#5ce07f] text-sm border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] border-2 hover:border-[#5ce07f] text-sm border-[#696a6b]  rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations1[index]}
@@ -530,7 +585,7 @@
                     {#each allocations2 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] text-sm hover:border-[#5ce07f] border-2 border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm hover:border-[#5ce07f] border-2 border-[#696a6b]  rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations2[index]}
@@ -548,7 +603,7 @@
                     {#each allocations3 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] text-sm border-2 hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm border-2 hover:border-[#5ce07f] border-[#696a6b] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations3[index]}

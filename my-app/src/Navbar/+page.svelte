@@ -11,14 +11,14 @@
     }
 
     function isActive(path) {
-        return currentPath === path ? 'text-[#5ce07f]' : 'text-[#D3D3D3]';
+        return currentPath === path ? 'text-[#5ce07f]' : 'text-black';
     }
 </script>
 
 <body>
 <div class="navbar h-[10vh]">
 
-    <div class="options flex gap-[2vw] w-fit items-center justify-center text-[#D3D3D3] text-base px-[25px]">
+    <div class="options flex gap-[2vw] w-fit items-center justify-center text-black text-base px-[25px]">
         <a class="hover:text-[#5ce07f] ease-in-out duration-200 {isActive('/')}" href="/">Home</a>
         <a class="hover:text-[#5ce07f] {isActive('/Mean')}" href="/Mean">Mean-variance</a>
         <a class="hover:text-[#5ce07f] {isActive('/Regression')}" href="/Regression" >Regression</a>
