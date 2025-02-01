@@ -1,7 +1,7 @@
 <script>
     import { onMount } from 'svelte';
     import axios from 'axios';
-    import Navbar from '../../Navbar/+page.svelte';
+    import Navbar from '../../components/Navbar/+page.svelte';
     import {openDB} from 'idb';
     import {
         Chart,
@@ -302,17 +302,17 @@
 <body>
 
     <Navbar/>
-    <div class="w-screen text-[#C0C0C0] h-screen grid reg-page">
+    <div class="w-screen h-screen grid reg-page">
 
         <div class="flex flex-col items-end justify-center">
             <h2 class="text-lg  w-[40%] mb-[3vh]">Start Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%] " id="year-picker" bind:value={startYear}>
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%] " id="year-picker" bind:value={startYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
@@ -320,12 +320,12 @@
             </div>
             <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">End Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
+                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
                     {#each years as year}
                     <option class="text-sm rounded" value={year}>{year}</option>
                     {/each}
                 </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
+                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
                     {#each Object.entries(months) as [month, value]}
                     <option class="text-sm rounded" value={month}>{month}</option>
                     {/each}
@@ -334,7 +334,7 @@
             <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">Ticker</h2>
             <div class="relative w-[40%]">
                 <input
-                    class=" h-[5vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] p-[10px] border-2 rounded-md outline-none"
+                    class=" h-[5vh] hover:border-[#5ce07f] border-[#A9A9A9] p-[10px] border-2 rounded-md outline-none"
                     type="text"
                     placeholder="Place ticker here..."
                     bind:value={ticker}
@@ -354,14 +354,14 @@
             </div>
             <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">Model</h2>
             <div class="w-[40%]">
-                <select class="border-2 flex hover:border-[#5ce07f] justify-center items-center w-[40%] rounded h-[4vh] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" bind:value={model}>
+                <select class="border-2 flex hover:border-[#5ce07f] justify-center items-center w-[40%] rounded h-[4vh] border-[#A9A9A9] text-base pl-[5%]" bind:value={model}>
                     {#each models as mod}
                     <option class="text-sm rounded" value={mod}>{mod}</option>
                     {/each}
                 </select>
             </div>
             <div class="w-[40%]">
-                <button class="mt-[5vh] py-[10px] px-[30px] text-xl text-black rounded-md hover:bg-[#282828] hover:text-[#C0C0C0] hover:border-[#696a6b] ease-in-out duration-150 border-2 border-[#5ce07f] bg-[#5ce07f]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+                <button class="mt-[5vh] py-[10px] px-[30px] text-xl text-black rounded-md border-[#A9A9A9] hover:bg-[#282828] hover:text-[#5ce07f] hover:border-[#696a6b] ease-in-out duration-150 border-2 border-[#5ce07f] bg-[#5ce07f]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             </div>
 
         </div>
@@ -458,7 +458,7 @@
 .reg-page{
     grid-template-columns: 30vw 70vw;
     /* background: #1b1b1b; */
-    background: linear-gradient(to bottom, #181818, #0e0f13);
+    /* background: linear-gradient(to bottom, #181818, #0e0f13); */
 
 }
 
@@ -470,7 +470,7 @@
     gap: 24px;
     margin: 0 auto;
     /* width: fit-content; */
-    box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3);
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
     border-radius: 20px;
     padding: 8px 32px;
     color: white;
@@ -479,7 +479,7 @@
 }
 .programming-stats:hover {
     transform: scale(1.02);
-    box-shadow: 0 4px 16px -7px rgba(255, 255, 255, .6);
+    box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.6);
 }
 .programming-stats .details ul {
     list-style: none;

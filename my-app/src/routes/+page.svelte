@@ -1,6 +1,6 @@
 <script>
 
-    import Navbar from '../Navbar/+page.svelte'
+    import Navbar from '../components/Navbar/+page.svelte'
 </script>
 <body>
     <Navbar/>

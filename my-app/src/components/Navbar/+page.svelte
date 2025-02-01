@@ -32,7 +32,7 @@
 
 
 <style lang="css">
-    @import '../app.css';
+    @import '../../app.css';
 
     .navbar a{
         position: relative;

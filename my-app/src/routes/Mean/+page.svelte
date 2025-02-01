@@ -1,6 +1,6 @@
 
 
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
     import axios from 'axios';
     import {openDB} from 'idb';
@@ -22,7 +22,13 @@
 
     import * as Table from "$lib/components/ui/table";
 
-    import Navbar from '../../Navbar/+page.svelte';
+    import Navbar from '../../components/Navbar/+page.svelte';
+
+    import { createEventDispatcher } from 'svelte';
+    import Calender from '../../components/Calender/+page.svelte';
+    
+    let selectedDate = '';
+    
 
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
 
@@ -39,6 +45,11 @@
     let isLoading = false;
 
     let etflist = []
+
+    let startMonth = '';
+    let endMonth = '';
+    let startDate = '';
+    let endDate = '';
 
     onMount(async () => {
         const db = await openDB('csvStore', 1, {
@@ -146,22 +157,7 @@
         isNormal = event.target.checked;
         
     }
-
-    function handleCheckboxChange3(event) {
-        isMax = event.target.checked;
-        
-    }
-    let years = [];
-    for (let year = 1970; year <= 2024; year++) {
-        years.push(year);
-    }
-    let months = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sept": 9, "Oct": 10, "Nov": 11, "Dec": 12}
-    
-    let startYear = '';
-    let endYear = '';
-    let startMonth = '';
-    
-    let endMonth = '';
+ 
  
     let items = [];
     let inputValues = Array(9).fill('');
@@ -173,6 +169,7 @@
         .filter(ticker => ticker.toLowerCase().includes(value.toLowerCase()))
         .slice(0, 3);
     }
+
 
     let isFocused = Array(9).fill(false);
 
@@ -206,26 +203,30 @@
     }
     let range = generateRange(1, 100);
 
+    function formatToYYYYMM(dateString) {
+        if (!dateString) return '';
+        const [year, month] = dateString.split('-');
+        return `${year}${month}`;
+    }
 
-  const handleSubmit = () => {
-    if (months[startMonth] >= 1 && months[startMonth] <= 9){
-        startMonth = `0${months[startMonth]}`
-    } else{
-        startMonth = `${months[startMonth]}`
+    const handleSubmit = () => {
+
+        startDate = formatToYYYYMM(startMonth)
+        endDate = formatToYYYYMM(endMonth)
+        console.log(startDate, endDate)
+        items = inputValues
+        
+        // inputValues = Array(9).fill('');
+    };
+
+
+    function handleStartMonth(event) {
+        startMonth = event.detail.monthYear;
     }
-    if (months[endMonth] >= 1 && months[endMonth] <= 9){
-        endMonth = `0${months[endMonth]}`
-    } else{
-        endMonth = `${months[endMonth]}`
+
+    function handleEndMonth(event) {
+        endMonth = event.detail.monthYear;
     }
-    for (let value of inputValues) {
-      if (value.trim() !== "") {
-        items = [...items, value.trim()];
-      }
-    }
-    
-    inputValues = Array(9).fill('');
-  };
 
     async function processInput() {
         try {
@@ -235,8 +236,8 @@
                 Short: isShort,
                 Max: isMax,
                 Normal: isNormal,
-                Start: Number(`${startYear}${startMonth}`),
-                End: Number(`${endYear}${endMonth}`)
+                Start: Number(`${startDate}`),
+                End: Number(`${endDate}`)
             }).then((response ) => {
                 isLoading = false;
                 return new Promise((resolve, reject) => {
@@ -501,24 +502,14 @@
 <body class="">
 
     <Navbar/>
-    <div class="main-page text-[#C0C0C0]" style=" cursor: {isLoading ? 'wait' : 'auto'};">
+    <div class="main-page" style=" cursor: {isLoading ? 'wait' : 'auto'};">
         
         <div class="all-inputs">
             <div>
                 <h2 class="mb-[3vh] text-xl">Advanced Options</h2>
                 <div class="checks text-lg mb-[5vh]">
                     <div class="flex flex-row gap-[1vw] justify-center align-center">
-                        <label><input class="w-[2.5vh] h-[2.5vh] rounded bg-[#2c2e2f] hover:border-[#5ce07f]" type="checkbox" name="btn" on:change={handleCheckboxChange3} checked={isMax}></label>
-                        <h2 class="">Maxuse</h2>
-                        <div class="hover-container">
-                            <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
-                            <div class="hover-textbox">
-                                Lorem ipsum odor amet, consectetuer adipiscing elit. Non quam inceptos natoque sem phasellus, ex euismod consequat luctus.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-row gap-[1vw] justify-center align-center">
-                        <label><input class="w-[2.5vh] h-[2.5vh]  rounded bg-[#2c2e2f] hover:border-[#5ce07f]" type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={isNormal}></label>
+                        <label><input class="w-[2.5vh] h-[2.5vh]  rounded hover:border-[#5ce07f]" type="checkbox" name="btn" on:change={handleCheckboxChange2} checked={isNormal}></label>
                         <h2>Normal</h2>
                         <div class="hover-container">
                             <i class="fa-solid fa-circle-question items-middle" style="color: #5ce07f;"></i>
@@ -532,28 +523,9 @@
             </div>
             <div class="dates mb-[5vh]">
                 <h2 class="text-xl mb-[3vh]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
-                <div class="grid grid-cols-4 w-[75%] gap-[2vw]">
-                    <select class="border-2 flex justify-start items-start rounded pt-[5px] h-[4vh] border-[#696a6b] bg-[#2c2e2f] hover:border-[#5ce07f] text-base pl-[5%]" id="year-picker" bind:value={startYear}>
-                        {#each years as year}
-                        <option class="text-sm rounded" value={year}>{year}</option>
-                        {/each}
-                    </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] pt-[5px] border-[#696a6b] bg-[#2c2e2f] hover:border-[#5ce07f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
-                        {#each Object.entries(months) as [month, value]}
-                        <option class="text-sm rounded" value={month}>{month}</option>
-                        {/each}
-                    </select>
-                    
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] pt-[5px] border-[#696a6b] bg-[#2c2e2f] hover:border-[#5ce07f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
-                        {#each years as year}
-                        <option class="text-sm rounded" value={year}>{year}</option>
-                        {/each}
-                    </select>
-                    <select class="border-2 flex justify-center items-center rounded h-[4vh] pt-[5px] border-[#696a6b] bg-[#2c2e2f] hover:border-[#5ce07f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
-                        {#each Object.entries(months) as [month, value]}
-                        <option class="text-sm rounded" value={month}>{month}</option>
-                        {/each}
-                    </select>
+                <div class="grid grid-cols-2 w-[75%] gap-[2vw]">
+                      <Calender bind:selectedMonthYear={startMonth} on:monthSelected={handleStartMonth} />
+                      <Calender bind:selectedMonthYear={endMonth} on:monthSelected={handleEndMonth} />
                 </div>
             </div>
             <div class="tickers mb-[5vh]">
@@ -563,7 +535,7 @@
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full bg-[#2c2e2f] h-[5vh] p-[10px] border-2 border-[#696a6b] hover:border-[#5ce07f] rounded-md outline-none"
+                            class="w-full h-[5vh] p-[10px] border-2 border-[#A9A9A9] hover:border-[#5ce07f] rounded-md outline-none"
                             type="text"
                             placeholder="Place ticker here..."
                             bind:value={inputValues[index]}
@@ -585,11 +557,11 @@
 
                 </div>
             </div>
-            <button class="py-[10px] px-[30px] text-xl rounded-md ease-in-out duration-150 border-2 text-black border-[#5ce07f] bg-[#5ce07f] hover:bg-[#282828] hover:text-[#C0C0C0] hover:border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+            <button class="py-[10px] px-[30px] text-xl border-[#A9A9A9] rounded-md ease-in-out duration-150 border-2 text-black border-[#5ce07f] bg-[#5ce07f] hover:bg-[#282828] hover:text-[#5ce07f] hover:border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
             
         </div>
         <div class="flex flex-col h-full items-center justify-center">
-            <h1 class="text-2xl mb-[5vh]">Stock Doughnut Chart</h1>
+            <h1 class="text-2xl mb-[5vh]">Optimal Mean-Variance Weights</h1>
             <div class="programming-stats">
                 {#if nothing}
                     <p>Enter your desired portfolio</p>
@@ -603,13 +575,13 @@
     </div>
     {#if !nothing}
     <div class="lgraph w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Stock Line Fill Graph</h1>
+        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Efficient Frontier Transition Map</h1>
         <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
             <canvas class="w-[55vw] min-w-[400px] line-chart"></canvas>
         </div>
     </div>
     <div class="bg-black w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Scatter Line Graph</h1>
+        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Efficient Frontier</h1>
         <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
             <canvas class="w-[55vw] min-w-[400px] combo-chart"></canvas>
         </div>
@@ -621,16 +593,7 @@
                 <h1 class="text-center text-xl mb-[5vh]">Asset Descriptive Statistics</h1>
                 <ul class="grid grid-cols-3 gap-[1.4vw]">
                     {#each desStats as item}
-                    <!-- <li class="programming-stats w-[20vh] h-[20vh] p-[2vh] bg-[#2c2e2f] rounded-lg border border-black/66">
-                        {#each Object.entries(item) as [key, values]}
-                        <div class="flex flex-col justify-center align-center h-full w-full">
-                            <h2 class="text-base text-center font-bold">{key}</h2>
-                            {#each values as value, index}
-                              <p class="text-center">{desStats_labels[index]} - {value}</p>
-                            {/each}
-                          </div>
-                        {/each}
-                    </li> -->
+    
                     <li class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[10vw] gap-[2vh] border-2 border-[#262629] shadow-lg bg-[#1c1c1f]">
                         {#each Object.entries(item) as [key, values]}
                             <h1 class="w-full border-b border-gray-700 py-4 text-xl text-start">{key}</h1>
@@ -713,7 +676,37 @@
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap');
     @import '../../app.css';
 
+    .date-picker {
+    position: relative;
+    display: inline-block;
+  }
 
+  .btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .calendar {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+
+  input[type="date"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
     .hover-container {
         position: relative;
         display: inline-block;
@@ -758,7 +751,6 @@
         position: relative;
         top: 0;
         left: 0;
-        background: #0e0f13;
 
     }
 
@@ -792,16 +784,16 @@
         justify-content: end;
         gap: 24px;
         margin: 0 auto;
-        box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3);
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
         border-radius: 20px;
         padding: 8px 32px;
-        color: white;
+        color: black;
         transition: all 400ms ease;
         /* background-color: #2e3233; */
     }
     .programming-stats:hover {
         transform: scale(1.02);
-        box-shadow: 0 4px 16px -7px rgba(255, 255, 255, .6);
+        box-shadow: 0 4px 16px -7px rgba(0, 0, 0, 0.6);
     }
     .programming-stats .details ul {
         list-style: none;

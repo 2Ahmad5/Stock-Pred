@@ -83,9 +83,15 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
     big_table = []
     gridsize = 100
     try: 
+        
         cdf = df[(df['ym'] >= startdate) & (df['ym'] <= enddate)]
+
+        # print("kdjvbdkfjvbkvbj")
         useretfL = etflist + ['Mkt-RF', 'RF', 'year', 'month', 'ym']
         cdf = cdf[useretfL]
+
+
+        
         
         # Indicating whether to use the maximum available data
         if not maxuse: 
@@ -570,10 +576,11 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             # edited
             big_table.append(efpdf)
 
-        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table
-    except: 
-        print("error")
-        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, False
+    except Exception as e:
+        print("Error:", e) 
+        # print("error")
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, 
         # mv(df, etflist, short, 0, normal, startdate, enddate)
 # %% 
 plt.rcParams['figure.figsize'] = [15, 5]
@@ -592,7 +599,7 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # maxuse = 0 (set to 0 for balanced sample)
 # normal = 0 (set to zero for resampling)
 
-# mv(df, ['AAPL', 'BNDX', 'VWO', 'VEA', 'AMZN', 'MSFT', 'NVDA'], 0, 0, 0, 201512, 202312)
+mv(df, ['AAPL', 'BNDX', 'VWO', 'VEA', 'AMZN', 'MSFT', 'NVDA'], 0, 0, 1, 200401, 202107)
 
 
 # edited

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import Navbar from "../../Navbar/+page.svelte";
+    import Navbar from "../../components/Navbar/+page.svelte";
     import axios from 'axios';
     import {openDB} from 'idb';
     import {
@@ -68,7 +68,7 @@
 
 
     let years = [];
-    let balances = ['daily', 'weekly', 'monthly', 'yearly']
+    let balances = ['None', 'Monthly', 'Yearly']
     /**@type {string[]}*/
     let benchmarks = []
     let csvData = []
@@ -236,6 +236,7 @@
     }
 
     const handleSubmit = () => {
+        console.log(value.day)
         if (months[startMonth] >= 1 && months[startMonth] <= 9){
             startMonth = `0${months[startMonth]}`
         } else{
@@ -476,7 +477,13 @@
                   </Button>
                 </Popover.Trigger>
                 <Popover.Content class="w-auto p-0" align="start">
-                  <Calendar bind:value />
+                  <!-- {/* Pass props to the Calendar to enable year selection */} -->
+                  <Calendar
+                    bind:value
+                    captionLayout="dropdown"
+                    fromYear={1990}        
+                    toYear={2030}
+                  />
                 </Popover.Content>
               </Popover.Root>
             </div>
@@ -506,7 +513,7 @@
         </div>
         <div class="flex flex-col justify-end items-center">
             <h2 class="text-lg mb-[3vh]">Rebalancing</h2>
-            <select class="border-2  flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] text-base pl-[2%]" id="balance-picker" bind:value={rebalance}>
+            <select class="border-2  flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[2%]" id="balance-picker" bind:value={rebalance}>
                 {#each balances as balance}
                 <option class="text-sm rounded" value={balance}>{balance}</option>
                 {/each}
@@ -514,16 +521,16 @@
         </div>
         <div class="flex flex-col justify-end items-center w-[7vw]">
             <h2 class="text-lg mb-[3vh]">Start Balance</h2>
-            <input class="border-2 flex justify-center items-center w-[90%] rounded  hover:border-[#5ce07f] h-[4vh] text-sm border-[#696a6b]  pl-[5%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
+            <input class="border-2 flex justify-center items-center w-[90%] rounded  hover:border-[#5ce07f] h-[4vh] text-sm border-[#A9A9A9]  pl-[5%]" type='number' bind:value={startBalance} placeholder="Enter numbers only">
 
         </div>
         <div class="flex flex-col justify-end items-center w-[7vw]">
             <h2 class="text-lg mb-[3vh]">Benchmark</h2>
-            <input class="border-2 flex justify-center items-center rounded w-[90%] hover:border-[#5ce07f] h-[4vh] border-[#696a6b] text-sm pl-[5%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
+            <input class="border-2 flex justify-center items-center rounded w-[90%] hover:border-[#5ce07f] h-[4vh] border-[#A9A9A9] text-sm pl-[5%]" type='text' bind:value={benchmark} placeholder="Enter benchmark">
 
         </div>
         <div class="flex flex-col justify-end items-end">
-            <button class="py-[10px] px-[30px] text-black text-xl rounded-md border-[#5ce07f] bg-[#5ce07f] ease-in-out duration-150 border-2 hover:bg-[#282828] hover:text-[#C0C0C0] hover:border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
+            <button class="py-[10px] px-[30px] text-black text-xl rounded-md border-[#A9A9A9] bg-[#5ce07f] ease-in-out duration-150 border-2 hover:bg-[#282828] hover:text-[#5ce07f] hover:border-[#696a6b]" on:click={handleSubmit} on:click={processInput}>Submit</button>
 
         </div>
 
@@ -537,7 +544,7 @@
                     {#each inputValues as inputValue, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] hover:border-[#5ce07f] border-2 text-sm border-[#696a6b]  rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] hover:border-[#5ce07f] border-2 text-sm border-[#A9A9A9]  rounded-md outline-none"
                             type="text"
                             placeholder="Place ticker..."
                             bind:value={inputValues[index]}
@@ -546,7 +553,7 @@
                             on:blur={() => setTimeout(() => handleBlur(index), 150)}
                         >
                         {#if isFocused[index] && suggestions[index].length > 0}
-                            <ul class="absolute bg-[#2c2e2f] border border-gray-300 w-full mt-1 border-[#5ce07f] rounded-md z-10 outline-none">
+                            <ul class="absolute bg-[#2c2e2f] border border-gray-300 w-full mt-1 border-[#A9A9A9] rounded-md z-10 outline-none">
                             {#each suggestions[index] as suggestion}
                                 <option class="p-2 rounded-md hover:bg-[#131217] cursor-pointer"  on:click={() => selectSuggestion(index, suggestion)}>
                                 {suggestion}
@@ -567,7 +574,7 @@
                     {#each allocations1 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] border-2 hover:border-[#5ce07f] text-sm border-[#696a6b]  rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] border-2 hover:border-[#5ce07f] text-sm border-[#A9A9A9]  rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations1[index]}
@@ -585,7 +592,7 @@
                     {#each allocations2 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] text-sm hover:border-[#5ce07f] border-2 border-[#696a6b]  rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm hover:border-[#5ce07f] border-2 border-[#A9A9A9] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations2[index]}
@@ -603,7 +610,7 @@
                     {#each allocations3 as allocation_value, index}
                         <div class="relative">
                         <input
-                            class="w-full h-[4vh] p-[10px] text-sm border-2 hover:border-[#5ce07f] border-[#696a6b] rounded-md outline-none"
+                            class="w-full h-[4vh] p-[10px] text-sm border-2 hover:border-[#5ce07f] border-[#A9A9A9] rounded-md outline-none"
                             type="number"
                             placeholder="number"
                             bind:value={allocations3[index]}
