@@ -28,8 +28,23 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
     return_table = {}
     middle_titles = []
     middle_values = {}
+    constraint = ""
 
     data_short = final_data[final_data['ticker_new'] == ticker]
+
+    min_date = data_short['date'].min()
+    max_date = data_short['date'].max()
+
+    if (start_date is None) or (start_date < min_date):
+        constraint = f"Data range for {ticker} is only available from {min_date} to {max_date}. Adjusting start date from {start_date} to {min_date}."
+        start_date = min_date
+
+    if (end_date is None) or (end_date > max_date):
+        constraint += f"Adjusting end date from {end_date} to {max_date}."
+        end_date = max_date
+
+    data_short = data_short[(data_short['date'] >= start_date) & (data_short['date'] <= end_date)]
+
     
     if (end_date is None) or (end_date > data_short['date'].max()):
         end_date = data_short['date'].max()
@@ -45,6 +60,7 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         x_var = data_short[['Mkt-RF']]
         factor_names = ['Mkt-Rf']
         n_factors = 1
+
     elif model == 'FF3':
         x_var = data_short[['Mkt-RF', 'HML', 'SMB']]
         factor_names = ['Mkt-Rf', 'HML', 'SMB']
@@ -220,58 +236,30 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
 
             if i < len(dates_aux) and i < len(out_roll) and len(out_roll[i]) > 5:
                 temp5.append({'x': dates_aux[i].strftime('%Y-%m-%d'), 'y': out_roll[i][5]})            
-
-        dataset = {
-            'label': 'Annualized_Alpha_Data',
+        datasets=  []
+        datasets.append({
+            'label': 'Annualized Alpha',
             'data': temp,
             'borderWidth': 1,
             'pointRadius': 2,
             'borderColor': 'red'
-        }
-        dataset1 = {
-            'label': 'Mkt-Rf',
-            'data': temp1,
-            'borderWidth': 1,
-            'pointRadius': 2,
-            'borderColor': 'orange'
-        }
-        dataset2 = {
-            'label': 'HML' if len(temp2) > 0 else None,
-            'data': temp2,
-            'borderWidth': 1,
-            'pointRadius': 2,
-            'borderColor': 'orange'
-        }
-        dataset3 = {
-            'label': 'SMB' if len(temp3) > 0 else None,
-            'data': temp3,
-            'borderWidth': 1,
-            'pointRadius': 2,
-            'borderColor': 'orange'
-        }
-        dataset4 = {
-            'label': 'CHA' if len(temp4) > 0 else None,
-            'data': temp4,
-            'borderWidth': 1,
-            'pointRadius': 2,
-            'borderColor': 'orange'
-        }
-        dataset5 = {
-            'label': 'RF' if len(temp5) > 0 else None,
-            'data': temp5,
-            'borderWidth': 1,
-            'pointRadius': 2,
-            'borderColor': 'orange'
-        }
+        })
 
+        # Loop through factor_names to dynamically set labels
+        for i in range(n_factors):
+            if len(locals()[f'temp{i+1}']) > 0:  # Ensure there's data
+                datasets.append({
+                    'label': factor_names[i],  # Dynamically assign factor names
+                    'data': locals()[f'temp{i+1}'],  
+                    'borderWidth': 1,
+                    'pointRadius': 2,
+                    'borderColor': 'orange'
+                })
 
-        
-        line_graph_1.append(dataset)
-        line_2.append(dataset1)
-        line_3.append(dataset2)
-        line_4.append(dataset3)
-        line_5.append(dataset4)
-        line_6.append(dataset5)
+        # Assign datasets to their respective lists
+        line_graph_1.append(datasets[0])  # Annualized Alpha
+        for i in range(1, len(datasets)):
+            eval(f'line_{i+1}').append(datasets[i]) 
 
 
         linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 1, 1, 1, 1, 1))]
@@ -288,7 +276,7 @@ def run_regression(final_data, ticker, start_date, end_date, model, rolling_peri
         # plt.show()
 
         
-        return line_graph_1, line_2, line_3, line_4, line_5, line_6, summary_data, return_table, middle_titles, middle_values
+        return line_graph_1, line_2, line_3, line_4, line_5, line_6, summary_data, return_table, middle_titles, middle_values, constraint
 
 # %% 
 # Import data from CSV file
@@ -339,7 +327,7 @@ def process2():
     endDate = data.get('End', 0)
     model = data.get('Mod', '')
     print(ticker, startDate, endDate, model)
-    line_graph_1, line2, line3, line4, line5, line6, mdl_summary, tbl_summary, mid_titles, mid_values = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
+    line_graph_1, line2, line3, line4, line5, line6, mdl_summary, tbl_summary, mid_titles, mid_values, constraint = run_regression(final_data, ticker, startDate, endDate, model, rolling_period)
     response_data = {
         'line_graph_1': line_graph_1,
         'line2': line2,
@@ -350,8 +338,10 @@ def process2():
         'mdl_summary': mdl_summary,
         'tbl_summary': tbl_summary,
         "mid_titles": mid_titles,
-        "mid_values": mid_values
+        "mid_values": mid_values,
+        "constraint": constraint
     }
+    print(response_data)
     return jsonify(response_data)
 
 

@@ -22,6 +22,7 @@
     import 'chartjs-adapter-luxon';
 
     import * as Table from "$lib/components/ui/table";
+    import Calender from '../../components/Calender/+page.svelte'
 
     Chart.register(DoughnutController, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController, TimeScale);
 
@@ -34,12 +35,13 @@
     let tbl_summary = {};
     let mid_values = {}
 
-    let startYear = "";
-    let endYear = "";
-    let startMonth = "";
-    let endMonth = "";
+    let startMonth = '';
+    let endMonth = '';
+    let startDate = '';
+    let endDate = '';
     let ticker = "";
     let model = "";
+    let constraint = "";
 
     let isFocused = false;
     let submit = false;
@@ -96,25 +98,33 @@
         suggestions = [];
     }
 
+    function formatToYYYYMM(dateString) {
+        if (!dateString) return '';
+        const [year, month] = dateString.split('-');
+        return `${year}${month}`;
+    }
+
     function handleSubmit(){
-        if (months[startMonth] >= 1 && months[startMonth] <= 9){
-            startMonth = `0${months[startMonth]}`
-        } else{
-            startMonth = `${months[startMonth]}`
-        }
-        if (months[endMonth] >= 1 && months[endMonth] <= 9){
-            endMonth = `0${months[endMonth]}`
-        } else{
-            endMonth = `${months[endMonth]}`
-        }
+        startDate = formatToYYYYMM(startMonth)
+        endDate = formatToYYYYMM(endMonth)
+        console.log(startDate, endDate)
+        
+    }
+
+    function handleStartMonth(event) {
+        startMonth = event.detail.monthYear;
+    }
+
+    function handleEndMonth(event) {
+        endMonth = event.detail.monthYear;
     }
 
     async function processInput(){
         try{
             await axios.post('http://127.0.0.1:5000/run_regress', {
                 Tick: ticker,
-                Start: Number(`${startYear}${startMonth}`),
-                End: Number(`${endYear}${endMonth}`),
+                Start: Number(`${startDate}`),
+                End: Number(`${endDate}`),
                 Mod: model
             }).then((response) => {
                 return new Promise((resolve, reject) => {
@@ -128,7 +138,16 @@
                 tbl_summary = results.tbl_summary;
                 mid_titles = results.mid_titles;
                 mid_values = results.mid_values;
-                updateChartData(results.line_graph_1[0], results.line2[0], results.line3[0], results.line4[0], results.line5[0], results.line6[0]);
+                constraint = results.constraint;
+                console.log(results.line_graph_6)
+                updateChartData(
+                results.line_graph_1?.[0] ?? {}, 
+                results.line2?.[0] ?? {}, 
+                results.line3?.[0] ?? {}, 
+                results.line4?.[0] ?? {}, 
+                results.line5?.[0] ?? {}, 
+                results.line6?.[0] ?? {}
+            );
             })
 
 
@@ -140,84 +159,38 @@
     function updateChartData(fl, sl, tl, forl, fil, sil){
 
         
-
         const ctx = document.querySelector('.first-line-chart').getContext('2d');
 
-        if(first_line_chart){
+        if (first_line_chart) {
             first_line_chart.destroy();
         }
 
+        // Ensure all datasets are defined, default to an empty object with data: []
+        const allDatasets = [fl, sl, tl, forl, fil, sil].map(dataset => dataset ?? { label: '', data: [] });
+
+        // Filter datasets safely by ensuring dataset and its data exist
+        const filteredDatasets = allDatasets.filter(dataset => dataset.data && Array.isArray(dataset.data) && dataset.data.length > 0);
+
+        // If no valid datasets exist, prevent chart rendering to avoid errors
+        if (filteredDatasets.length === 0) {
+            console.warn('⚠️ No valid data to display in the chart.');
+            return;
+        }
 
         first_line_chart = new Chart(ctx, {
             type: 'line',
             data: {
-                datasets: [{
+                datasets: filteredDatasets.map((dataset, index) => ({
                     type: 'line',
-                    label: fl.label,
-                    data: fl.data,
-                    borderColor: fl.borderColor,
-                    borderWidth: fl.borderWidth,
-                    pointRadius: fl.pointRadius,
+                    label: dataset.label,
+                    data: dataset.data,
+                    borderColor: dataset.borderColor || 'gray',
+                    borderWidth: dataset.borderWidth || 1,
+                    pointRadius: dataset.pointRadius || 2,
                     fill: false,
-                    yAxisID: 'y'
-                },
-                {
-                    type: 'line',
-                    label: sl.label,
-                    data: sl.data,
-                    borderColor: sl.borderColor,
-                    borderWidth: sl.borderWidth,
-                    pointRadius: sl.pointRadius,
-                    fill: false,
-                    yAxisID: 'y1'
-                },
-                {
-                    type: 'line',
-                    label: tl.label,
-                    data: tl.data,
-                    borderColor: tl.borderColor,
-                    borderWidth: tl.borderWidth,
-                    pointRadius: tl.pointRadius,
-                    borderDash: [10, 5],
-                    fill: false,
-                    yAxisID: 'y1'
-                },
-                {
-                    type: 'line',
-                    label: forl.label,
-                    data: forl.data,
-                    borderColor: forl.borderColor,
-                    borderWidth: forl.borderWidth,
-                    pointRadius: forl.pointRadius,
-                    borderDash: [2, 2],
-                    fill: false,
-                    yAxisID: 'y1'
-                },
-                {
-                    type: 'line',
-                    label: fil.label,
-                    data: fil.data,
-                    borderColor: fil.borderColor,
-                    borderWidth: fil.borderWidth,
-                    pointRadius: fil.pointRadius,
-                    borderDash: [2, 4, 2],
-                    fill: false,
-                    yAxisID: 'y1'
-                },
-                {
-                    type: 'line',
-                    label: sil.label,
-                    data: sil.data,
-                    borderColor: sil.borderColor,
-                    borderWidth: sil.borderWidth,
-                    pointRadius: sil.pointRadius,
-                    borderDash: [20, 10],
-                    fill: false,
-                    yAxisID: 'y1'
-                }
-            ]
-
-                
+                    yAxisID: index === 0 ? 'y' : 'y1',
+                    borderDash: index > 1 ? [index * 2, index * 4] : [],
+                }))
             },
             options: {
                 responsive: true,
@@ -235,13 +208,11 @@
                         }
                     },
                     y: {
-                       
                         type: 'linear',
                         position: 'left',
                         ticks: {
                             color: 'red'
                         },
-                       
                         title: {
                             display: true,
                             text: 'Annualized Alpha',
@@ -249,7 +220,6 @@
                         }
                     },
                     y1: {
-                 
                         type: 'linear',
                         position: 'right',
                         ticks: {
@@ -267,8 +237,7 @@
                 }
             }
         });
-
-    }
+        }
 
     onMount(() => {
         const ctx = document.querySelector('.first-line-chart').getContext('2d');
@@ -307,29 +276,11 @@
         <div class="flex flex-col items-end justify-center">
             <h2 class="text-lg  w-[40%] mb-[3vh]">Start Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%] " id="year-picker" bind:value={startYear}>
-                    {#each years as year}
-                    <option class="text-sm rounded" value={year}>{year}</option>
-                    {/each}
-                </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
-                    {#each Object.entries(months) as [month, value]}
-                    <option class="text-sm rounded" value={month}>{month}</option>
-                    {/each}
-                </select>
+                <Calender bind:selectedMonthYear={startMonth} on:monthSelected={handleStartMonth} />
             </div>
             <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">End Date (Year, Month)</h2>
             <div class="grid grid-cols-2 w-[40%] gap-[1vw]">
-                <select class="border-2 flex justify-center items-center w-full rounded h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
-                    {#each years as year}
-                    <option class="text-sm rounded" value={year}>{year}</option>
-                    {/each}
-                </select>
-                <select class="border-2 flex justify-center items-center rounded w-full h-[4vh] hover:border-[#5ce07f] border-[#A9A9A9] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
-                    {#each Object.entries(months) as [month, value]}
-                    <option class="text-sm rounded" value={month}>{month}</option>
-                    {/each}
-                </select>
+                <Calender bind:selectedMonthYear={endMonth} on:monthSelected={handleEndMonth} />
             </div>
             <h2 class="text-lg w-[40%] mt-[5vh] mb-[3vh]">Ticker</h2>
             <div class="relative w-[40%]">
@@ -365,17 +316,19 @@
             </div>
 
         </div>
-        <div class="flex items-center justify-center pt-[10vh]">
+        <div class="flex flex-col items-center justify-center pt-[10vh]">
+            <h1 class="text-2xl mb-[5vh]">36-Month Rolling Regression</h1>
             <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
                 <canvas class="w-[60vw] first-line-chart"></canvas>
             </div>
+            <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
         </div>
         
 
     </div>
     {#if submit}
-    <div class="w-screen items-center bg-[#0e0f13]">
-        <h1 class="text-xl text-[#C0C0C0] text-center">OLS Regression Results</h1>
+    <div class="w-screen items-center">
+        <h1 class="text-xl text-center">OLS Regression Results</h1>
         <div class="flex flex-col items-center">
             <div class="w-[60vw] text-gray-100 p-8">
                 <div class="max-w-7xl mx-auto">
@@ -391,7 +344,7 @@
                   
                 </div>
             </div>
-            <div class="w-[60vw] bg-[#242627] overflow-x-auto rounded-lg shadow-lg p-4">
+            <div class="w-[60vw] overflow-x-auto rounded-lg shadow-lg p-4">
                 <table class="w-full">
                   <thead>
                     <tr class="border-b text-gray-400 border-gray-700">

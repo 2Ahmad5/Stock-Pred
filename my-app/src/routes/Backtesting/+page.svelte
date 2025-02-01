@@ -25,22 +25,7 @@
 
     import * as Table from "$lib/components/ui/table";
 
-    import CalendarIcon from "lucide-svelte/icons/calendar";
-    import {
-        type DateValue,
-        DateFormatter,
-        getLocalTimeZone,
-    } from "@internationalized/date";
-    import { cn } from "$lib/utils.js";
-    import { Button } from "$lib/components/ui/button";
-    import { Calendar } from "$lib/components/ui/calendar";
-    import * as Popover from "$lib/components/ui/popover";
-    
-    const df = new DateFormatter("en-US", {
-        dateStyle: "long",
-    });
-    
-    let value: DateValue | undefined = undefined;
+    import Calender from "../../components/Calender/+page.svelte";
 
 
     Chart.register(BarController, BarElement, DoughnutController, TimeScale, ArcElement, Tooltip, Legend, CategoryScale, LineController, LineElement, PointElement, LinearScale, Title, Filler, ScatterController);
@@ -56,10 +41,10 @@
     let nothing = true;
 
 
-    let startYear = '';
-    let endYear = '';
     let startMonth = '';
     let endMonth = '';
+    let startDate = '';
+    let endDate = '';
     let rebalance = '';
     let benchmark = '';
     /** @type {number} */
@@ -99,13 +84,7 @@
     let suggestions = Array(10).fill([]);
 
 
-    let months = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sept": 9, "Oct": 10, "Nov": 11, "Dec": 12}
     let results = {}
-
-
-    for (let year = 1970; year <= 2024; year++) {
-        years.push(year);
-    }
 
     onMount(async () => {
         const db = await openDB('csvStore', 1, {
@@ -235,24 +214,28 @@
         suggestions[index] = [];
     }
 
+    function formatToYYYYMM(dateString) {
+        if (!dateString) return '';
+        const [year, month] = dateString.split('-');
+        return `${year}${month}`;
+    }
+
     const handleSubmit = () => {
-        console.log(value.day)
-        if (months[startMonth] >= 1 && months[startMonth] <= 9){
-            startMonth = `0${months[startMonth]}`
-        } else{
-            startMonth = `${months[startMonth]}`
-        }
-        if (months[endMonth] >= 1 && months[endMonth] <= 9){
-            endMonth = `0${months[endMonth]}`
-        } else{
-            endMonth = `${months[endMonth]}`
-        }
+        
         items = inputValues
 
         benchmarks.push(benchmark);
         
         inputValues = Array(10).fill('');
         nothing = false;
+    }
+
+    function handleStartMonth(event) {
+        startMonth = event.detail.monthYear;
+    }
+
+    function handleEndMonth(event) {
+        endMonth = event.detail.monthYear;
     }
 
     async function processInput() {
@@ -444,72 +427,10 @@
         <div class=" col-span-2 flex flex-col justify-end items-center">
             <h2 class="text-lg mb-[3vh] px-[1vw]">Picking Dates (Start Yr/Month. End Yr/Month)</h2>
             <div class="flex gap-[2vw]">
-            <Popover.Root>
-                <Popover.Trigger asChild let:builder>
-                  <Button
-                    variant="outline"
-                    class={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !value && "text-muted-foreground"
-                    )}
-                    builders={[builder]}
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
-                  </Button>
-                </Popover.Trigger>
-                <Popover.Content class="w-auto p-0" align="start">
-                  <Calendar bind:value />
-                </Popover.Content>
-              </Popover.Root>
-              <Popover.Root>
-                <Popover.Trigger asChild let:builder>
-                  <Button
-                    variant="outline"
-                    class={cn(
-                      "w-[240px] justify-start text-left font-normal",
-                      !value && "text-muted-foreground"
-                    )}
-                    builders={[builder]}
-                  >
-                    <CalendarIcon class="mr-2 h-4 w-4" />
-                    {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
-                  </Button>
-                </Popover.Trigger>
-                <Popover.Content class="w-auto p-0" align="start">
-                  <!-- {/* Pass props to the Calendar to enable year selection */} -->
-                  <Calendar
-                    bind:value
-                    captionLayout="dropdown"
-                    fromYear={1990}        
-                    toYear={2030}
-                  />
-                </Popover.Content>
-              </Popover.Root>
+                <Calender bind:selectedMonthYear={startMonth} on:monthSelected={handleStartMonth} />
+                <Calender bind:selectedMonthYear={endMonth} on:monthSelected={handleEndMonth} />
             </div>
-            <!-- <div class="grid grid-cols-4 w-full gap-[1vw]">
-                <select class=" border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startYear}>
-                    {#each years as year}
-                    <option class="text-sm rounded" value={year}>{year}</option>
-                    {/each}
-                </select>
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={startMonth}>
-                    {#each Object.entries(months) as [month, value]}
-                    <option class="text-sm rounded" value={month}>{month}</option>
-                    {/each}
-                </select>
-                
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endYear}>
-                    {#each years as year}
-                    <option class="text-sm rounded" value={year}>{year}</option>
-                    {/each}
-                </select>
-                <select class="border-2 flex justify-center items-center rounded h-[4vh] hover:border-[#5ce07f] border-[#696a6b] bg-[#2c2e2f] text-base pl-[5%]" id="year-picker" bind:value={endMonth}>
-                    {#each Object.entries(months) as [month, value]}
-                    <option class="text-sm rounded" value={month}>{month}</option>
-                    {/each}
-                </select>
-            </div> -->
+           
         </div>
         <div class="flex flex-col justify-end items-center">
             <h2 class="text-lg mb-[3vh]">Rebalancing</h2>

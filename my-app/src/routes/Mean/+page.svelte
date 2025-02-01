@@ -50,6 +50,7 @@
     let endMonth = '';
     let startDate = '';
     let endDate = '';
+    let constraint = '';
 
     onMount(async () => {
         const db = await openDB('csvStore', 1, {
@@ -214,7 +215,11 @@
         startDate = formatToYYYYMM(startMonth)
         endDate = formatToYYYYMM(endMonth)
         console.log(startDate, endDate)
-        items = inputValues
+        for (let value of inputValues) {
+            if (value.trim() !== "") {
+                items = [...items, value.trim()];
+            }
+        }
         
         // inputValues = Array(9).fill('');
     };
@@ -271,9 +276,11 @@
                     }
                     
                 }
+                constraint = results.constraint;
+                console.log(constraint)
+                new_robust['Return'] = robust['Return']
                 new_robust['Std'] = robust['Std']
                 new_robust['SR'] = robust['SR']
-                new_robust['Return'] = robust['Return']
                 robust = new_robust;
                 updateChart(results.first_chart, results.second_chart, minX, maxX, minY, maxY, results.third_chart, results.third_chart_2);
             })
@@ -570,23 +577,26 @@
                 <canvas class="w-[50vh] my-chart"></canvas>
                 {/if}
             </div>
+            <p class="text-[#8c8c8c] text-sm mt-[1vh]">{constraint}</p>
             
         </div>
     </div>
     {#if !nothing}
     <div class="lgraph w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Efficient Frontier Transition Map</h1>
+        <h1 class="text-xl mb-[5vh] text-center">Efficient Frontier Transition Map</h1>
         <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
             <canvas class="w-[55vw] min-w-[400px] line-chart"></canvas>
         </div>
+        <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
     </div>
-    <div class="bg-black w-full h-[100vh] flex flex-col justify-center align-center">
-        <h1 class="text-xl mb-[5vh] text-center text-[#C0C0C0]">Efficient Frontier</h1>
+    <div class="bg-white w-full h-[100vh] flex flex-col justify-center align-center">
+        <h1 class="text-xl mb-[5vh] text-center">Efficient Frontier</h1>
         <div class="programming-stats max-h-[70vh] w-[70vw] min-w-[400px] p-[5vh]">
             <canvas class="w-[55vw] min-w-[400px] combo-chart"></canvas>
         </div>
+        <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
     </div>
-    <div class=" bg-[#111111] w-[100vw] text-[#C0C0C0] pt-[15vh]">
+    <div class=" w-[100vw] pt-[15vh]">
         <div class="grid grid-cols-2 gap-[5vw] w-[90vw] justify-self-center justify-center align-center">
         
             <div>
@@ -594,7 +604,7 @@
                 <ul class="grid grid-cols-3 gap-[1.4vw]">
                     {#each desStats as item}
     
-                    <li class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[10vw] gap-[2vh] border-2 border-[#262629] shadow-lg bg-[#1c1c1f]">
+                    <li class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[10vw] gap-[2vh] border-2 border-[#262629] shadow-lg">
                         {#each Object.entries(item) as [key, values]}
                             <h1 class="w-full border-b border-gray-700 py-4 text-xl text-start">{key}</h1>
                             <div class="flex flex-col w-full">
@@ -615,7 +625,7 @@
                 
                 <table class="w-[100%] border-collapse border border-gray-300">
                     <thead>
-                      <tr class="bg-[#2c2e2f]">
+                      <tr class="bg-[#949494]">
                         <th class="border border-gray-300 p-3 text-center font-bold"> </th>
                         {#each Object.keys(corrStats) as key}
                           <th class="border border-gray-300 p-3 text-center font-bold">{key}</th>
@@ -625,7 +635,7 @@
                     <tbody>
                       {#each Object.keys(corrStats) as rowKey}
                         <tr>
-                          <th class="border bg-[#2c2e2f] border-gray-300 p-3 text-center font-medium">{rowKey}</th>
+                          <th class="border bg-[#949494] border-gray-300 p-3 text-center font-medium">{rowKey}</th>
                           {#each Object.keys(corrStats[rowKey]) as colKey}
                             <td class="border border-gray-300 text-center p-3 hover:bg-[#2b2c30] transition-all ease-in-out duration-200">
                               <p class="text-base font-mono">{corrStats[rowKey][colKey].toFixed(2)}</p>
@@ -798,15 +808,6 @@
     .programming-stats .details ul {
         list-style: none;
         padding: 0;
-    }
-
-    .lgraph{
-        background: linear-gradient(
-  to bottom,
-  #0e0f13,
-  #0c0d10 40%, 
-  black 100% 
-);
     }
     
     

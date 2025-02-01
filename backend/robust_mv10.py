@@ -82,16 +82,43 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
     assest_corr = []
     big_table = []
     gridsize = 100
+    constraint = ""
     try: 
         
         cdf = df[(df['ym'] >= startdate) & (df['ym'] <= enddate)]
 
-        # print("kdjvbdkfjvbkvbj")
         useretfL = etflist + ['Mkt-RF', 'RF', 'year', 'month', 'ym']
         cdf = cdf[useretfL]
 
 
-        
+        tickers = [t for t in etflist if t and t in df.columns]
+
+        # Filter to only relevant columns
+        data_short = df[['ym', 'year', 'month'] + tickers].melt(id_vars=['ym', 'year', 'month'], var_name='ticker_new', value_name='value')
+
+        data_short = data_short.dropna(subset=['value'])
+
+        min_date = data_short.groupby('ticker_new')['ym'].min()
+        max_date = data_short.groupby('ticker_new')['ym'].max()
+
+        max_min_date = min_date.max()
+        min_max_date = max_date.min()
+
+        if not startdate:
+            startdate = max_min_date
+
+        # Adjust startdate if it's too early
+        if max_min_date > startdate:
+            constraint = f"Data range will start from {max_min_date} to {min_max_date} because that is the first available date for ticker {min_date.idxmax()}"
+            startdate = max_min_date
+
+        if not enddate:
+            enddate = min_max_date
+
+        # Validate date range
+        if startdate >= enddate:
+            print("Error: Start date cannot be after end date")
+            return None
         
         # Indicating whether to use the maximum available data
         if not maxuse: 
@@ -576,11 +603,11 @@ def mv(df, etflist = ['BNDX', 'SPSM', 'SPMD', 'SPLG', 'VWO', 'VEA', 'MUB', 'EMB'
             # edited
             big_table.append(efpdf)
 
-        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, False
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, constraint
     except Exception as e:
         print("Error:", e) 
         # print("error")
-        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, 
+        return answer, datasets, mixed_data, mixed_data_scatter, descriptive_statistics, assest_corr, big_table, constraint
         # mv(df, etflist, short, 0, normal, startdate, enddate)
 # %% 
 plt.rcParams['figure.figsize'] = [15, 5]
@@ -599,7 +626,7 @@ etflist = ['BNDX', 'SPSM', 'SPMD','SPLG','VWO','VEA','MUB','EMB']
 # maxuse = 0 (set to 0 for balanced sample)
 # normal = 0 (set to zero for resampling)
 
-mv(df, ['AAPL', 'BNDX', 'VWO', 'VEA', 'AMZN', 'MSFT', 'NVDA'], 0, 0, 1, 200401, 202107)
+# mv(df, ['AAPL', 'BNDX', 'VWO', 'VEA', 'AMZN', 'MSFT', 'NVDA'], 0, 0, 1, 200401, 202107)
 
 
 # edited
@@ -616,7 +643,7 @@ def process():
     startDate = data.get('Start', 0)
     endDate = data.get('End', 0)
     print(ticker_list, isShort, isMax, isNormal, startDate, endDate)
-    first_chart, second_chart, third_chart, third_chart_2, first_prints, second_prints, third_prints = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
+    first_chart, second_chart, third_chart, third_chart_2, first_prints, second_prints, third_prints, constraint = mv(df, ticker_list, 1 if isShort else 0, 1 if isMax else 0, 1 if isNormal else 0, startDate, endDate)
     if isinstance(first_chart, np.ndarray) and first_chart.size > 0:
         first_chart = first_chart.tolist()
     else:
@@ -636,7 +663,8 @@ def process():
         'third_chart_2': third_chart_2,
         'first_prints': first_prints,
         'second_prints': second_prints_dict,
-        'third_prints': third_prints_dict
+        'third_prints': third_prints_dict,
+        'constraint': constraint
     }
     return jsonify(response_data)
 
