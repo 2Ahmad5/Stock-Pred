@@ -47,13 +47,15 @@
     let endDate = '';
     let rebalance = '';
     let benchmark = '';
+    let constraint = '';
+    let error = '';
     /** @type {number} */
     let startBalance;
 
 
 
     let years = [];
-    let balances = ['None', 'Monthly', 'Yearly']
+    let balances = ['None', 'monthly', 'yearly']
     /**@type {string[]}*/
     let benchmarks = []
     let csvData = []
@@ -221,12 +223,15 @@
     }
 
     const handleSubmit = () => {
+
+        startDate = formatToYYYYMM(startMonth);
+        endDate = formatToYYYYMM(endMonth);
         
         items = inputValues
 
         benchmarks.push(benchmark);
         
-        inputValues = Array(10).fill('');
+        // inputValues = Array(10).fill('');
         nothing = false;
     }
 
@@ -243,8 +248,8 @@
             await axios.post('http://127.0.0.1:5000/regres', {
 
                 ticker_list: items,
-                start: Number(`${startYear}${startMonth}`),
-                end: Number(`${endYear}${endMonth}`),
+                start: Number(`${startDate}`),
+                end: Number(`${endDate}`),
                 benchmark: benchmarks,
                 allocation1: allocations1,
                 allocation2: allocations2,
@@ -258,6 +263,7 @@
                 })
             }).then((response) => {
                 results = response.data
+                error = results.error
                 port_allocations = results.port_allocations
                 drawdown_print = {};
                 for (const key in results.drawdown_print) {
@@ -272,7 +278,8 @@
                 }
                 regression_analysis = results.regression_analysis
                 metrics = metrics = Object.keys(regression_analysis[Object.keys(regression_analysis)[0]].alpha);
-
+                constraint = results.constraint
+                
                 nothing = false;
                 updateChart(results.portfolio_growths, results.annual_returns_data, results.drawdown_data)
 
@@ -281,9 +288,9 @@
             console.error('Error:', error);
         }
         items = []
-        allocations1 = Array(10).fill(null);
-        allocations2 = Array(10).fill(null);
-        allocations3 = Array(10).fill(null);
+        // allocations1 = Array(10).fill(null);
+        // allocations2 = Array(10).fill(null);
+        // allocations3 = Array(10).fill(null);
         benchmarks = []
 
     }
@@ -457,6 +464,11 @@
 
     </div>
     <div class="flex text-black">
+        {#if error.length > 0}
+            <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg">
+                {error}
+            </div>
+        {/if}
         <div class="w-[40%] h-[75vh] flex flex-col justify-center">
             <div class="tickers mb-[3vh] pl-[25%]">
                 <h2 class="text-lg mb-[1vh] w-full">Ticker Symbols</h2>
@@ -550,29 +562,32 @@
             <div class="programming-stats max-h-[65vh] w-[55vw] min-w-[400px]">
                 <canvas class="w-[45vw] min-w-[400px] growth-chart"></canvas>
             </div>
+            <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
         </div>
         {/if}
     </div>
     {#if !nothing}
-        <div class="w-full h-[100vh] border-t-[#313131] bg-[#1c1c1c] flex flex-col border-t-[5px] justify-center align-center">
-            <h1 class="text-xl mb-[5vh] text-[#C0C0C0] text-center">Annual Returns</h1>
+        <div class="w-full h-[100vh] flex flex-col border-t-[5px] justify-center align-center">
+            <h1 class="text-xl mb-[5vh] text-black text-center">Annual Returns</h1>
             <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
                 <canvas class="w-[55vw] min-w-[400px] annual-returns-chart"></canvas>
             </div>
+            <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
         </div>
-        <div class="w-full h-[100vh] text-[#C0C0C0] bg-[#1c1c1c] flex flex-col justify-center align-center">
+        <div class="w-full h-[100vh] text-black flex flex-col justify-center align-center">
             <h1 class="text-xl mb-[5vh] text-center">Drawdown Data</h1>
             <div class="programming-stats max-h-[80vh] w-[60vw] min-w-[400px] p-[5vh]">
                 <canvas class="w-[55vw] min-w-[400px] drawdown-chart"></canvas>
             </div>
+            <p class="text-[#8c8c8c] text-sm mt-[1vh] text-center">{constraint}</p>
         </div>
     {/if}
     {#if port_allocations}
-    <div class="bg-[#1c1c1c] text-[#C0C0C0]">
+    <div class=" text-black">
         <h1 class="text-xl mb-[5vh] text-center">Portfolio Allocation</h1>
         <div class="w-[70%] h-[30vh] grid grid-cols-3 justify-self-center ">
             {#each Object.keys(port_allocations) as i}
-                <div class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[15vw] gap-[2vh] border-2 border-[#262629] shadow-lg bg-[#1c1c1f]">
+                <div class="flex flex-col justify-self-center rounded-xl items-start p-[2vh] w-[15vw] gap-[2vh] border-2 border-[#262629] shadow-lg">
                     <h1 class="w-full border-b border-gray-700 py-4 text-xl">{i}</h1>
                     <div class="flex flex-col">
                         {#each Object.keys(port_allocations[i]) as j}

@@ -145,6 +145,8 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
     port_allocations = {}
     drawdown_print = {}
     regression_analysis = {}
+    constraint = ""
+    error = ""
 
 
 
@@ -196,18 +198,22 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
             if n_tickers != n_alloc:
                 print(f"Error: The number of weights needs to be the same as the number of tickers in {portfolio_name[p]}")
-                return
+                error = f"Error: The number of weights needs to be the same as the number of tickers in {portfolio_name[p]}"
+
+                return portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis, constraint, error
 
             # Check that every element of allocation is between zero and 100
             indicator = (alloc >= 0) & (alloc <= 100)
             if n_alloc != sum(indicator):
                 print(f"Error: Weights need to be between zero and 100 in {portfolio_name[p]}")
-                return
+                error = f"Error: Weights need to be between zero and 100 in {portfolio_name[p]}"
+                return portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis, constraint, error
 
             # Check allocation adds up to 100
             if not np.nansum(alloc) == 100:
                 print(f"Error: Weights need to add up to 100 in {portfolio_name[p]}")
-                return
+                error = f"Error: Weights need to add up to 100 in {portfolio_name[p]}"
+                return portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis, constraint, error
 
     # Filter data for the tickers in the allocation
     data_short = final_data[final_data['ticker_new'].isin(tickers)]
@@ -228,6 +234,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
     if max_min_date > start_date:
         print(f"Data range will start from {max_min_date} because that is the first available date for ticker {non_empty_idx[min_date.argmax()]}")
+        constraint = f"Data range will start from {max_min_date} because that is the first available date for ticker {non_empty_idx[min_date.argmax()]}"
         start_date = max_min_date
 
     if not end_date:
@@ -235,6 +242,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
     if start_date >= end_date:
         print("Error: Start date cannot be after end date")
+        error = "Error: Start date cannot be after end date"
         return
 
     # Filter data based on date range
@@ -424,9 +432,9 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
     for i, portfolio_name in enumerate(active_portfolio_names):
         dataset = {
             "label": portfolio_name,  # Portfolio name
-            "data": [round(float(value) * 100, 2) if not np.isnan(value) else None for value in y_values[:, i]],  # Annual returns in percentage
-            "backgroundColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 0.6)",  # Custom color for each portfolio
-            "borderColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 1)",  # Border color
+            "data": [round(float(value) * 100, 2) if not np.isnan(value) else None for value in y_values[:, i]],
+            "backgroundColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 0.6)",
+            "borderColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 1)",
             "borderWidth": 1
         }
         annual_returns_data["datasets"].append(dataset)
@@ -567,7 +575,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
     # print(port_allocations)
     # print(drawdown_print)
     # print(regression_analysis)
-    return portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis
+    return portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis, constraint, error
     
 
 
@@ -588,31 +596,31 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
 # %%
 # Input test 2
-start_date = 197001
-end_date = None  
-tickers = ['VTI', 'VNQ', '', 'BND', 'MUB', '', '', '', '', 'SPLG'] 
-
-allocation1 = [48, 8, None, 20, 24, None, None, None, None, None]  
-allocation2 = [48, None, None, None, 30, None, None, None, None, 22]
-allocation3 = [None, None, None, None, 50, None, None, None, None, 50] 
-
-rebalancing = 'monthly'  
-benchmark = ['CRSPVW']  
-start_balance = 10000 
-
-# %%
-# Input test 3
-# start_date = 197501
+# start_date = 197001
 # end_date = None  
-# tickers = ['VTI', '', '', 'BND', 'MUB', '', '', '', '', 'SPLG'] 
+# tickers = ['VTI', 'VNQ', '', 'BND', 'MUB', '', '', '', '', 'SPLG'] 
 
-# allocation1 = [None, None, None, None, None, None, None, None, None, None]  
+# allocation1 = [48, 8, None, 20, 24, None, None, None, None, None]  
 # allocation2 = [48, None, None, None, 30, None, None, None, None, 22]
 # allocation3 = [None, None, None, None, 50, None, None, None, None, 50] 
 
 # rebalancing = 'monthly'  
 # benchmark = ['CRSPVW']  
 # start_balance = 10000 
+
+# %%
+# Input test 3
+start_date = 197501
+end_date = None  
+tickers = ['VTI', '', '', 'BND', 'MUB', '', '', '', '', 'SPLG'] 
+
+allocation1 = [None, None, None, None, None, None, None, None, None, None]  
+allocation2 = [48, None, None, None, 30, None, None, None, None, 22]
+allocation3 = [None, None, None, None, 50, None, None, None, None, 50] 
+
+rebalancing = 'monthly'  
+benchmark = ['CRSPVW']  
+start_balance = 10000 
 
 # %%
 # backtesting(start_date, end_date, tickers, allocation1, allocation2, allocation3, rebalancing, benchmark, start_balance)
@@ -634,7 +642,7 @@ def process3():
 
     print(ticker_list, start_date, end_date, benchmark, allocation1, allocation2, allocation3, start_balance, rebalancing)
 
-    portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis = backtesting(start_date, end_date, tickers, allocation1, allocation2, allocation3, rebalancing, benchmark, start_balance)
+    portfolio_growths, annual_returns_data, drawdown_data, port_allocations, drawdown_print, regression_analysis, constraint, error = backtesting(start_date, end_date, tickers, allocation1, allocation2, allocation3, rebalancing, benchmark, start_balance)
     # print(portfolio_growths, annual_returns_data, drawdown_data)
     response_data = {
         'portfolio_growths': portfolio_growths,
@@ -642,7 +650,9 @@ def process3():
         'drawdown_data': drawdown_data,
         'port_allocations': port_allocations,
         'drawdown_print': drawdown_print,
-        'regression_analysis': regression_analysis
+        'regression_analysis': regression_analysis,
+        'constraint': constraint,
+        'error': error,
     }
 
 

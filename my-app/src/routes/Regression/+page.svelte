@@ -140,6 +140,7 @@
                 mid_values = results.mid_values;
                 constraint = results.constraint;
                 console.log(results.line_graph_6)
+                console.log(summary)
                 updateChartData(
                 results.line_graph_1?.[0] ?? {}, 
                 results.line2?.[0] ?? {}, 
@@ -147,6 +148,7 @@
                 results.line4?.[0] ?? {}, 
                 results.line5?.[0] ?? {}, 
                 results.line6?.[0] ?? {}
+    
             );
             })
 
@@ -330,7 +332,7 @@
     <div class="w-screen items-center">
         <h1 class="text-xl text-center">OLS Regression Results</h1>
         <div class="flex flex-col items-center">
-            <div class="w-[60vw] text-gray-100 p-8">
+            <!-- <div class="w-[60vw] text-gray-100 p-8">
                 <div class="max-w-7xl mx-auto">
                   <div class="grid grid-cols-4 gap-4 mb-12">
                     {#each Object.entries(summary) as [key, value]}
@@ -342,6 +344,20 @@
                   </div>
               
                   
+                </div>
+            </div> -->
+            <div class="flex flex-col items-center mb-[5vh]">
+                <div class="w-[60vw] text-gray-200 p-8 rounded-lg shadow-lg font-mono">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            {#each Object.entries(summary) as [key, value]}
+                                <div class="flex justify-between border-b border-gray-600 py-1">
+                                    <p class="text-sm text-gray-300">{key}:</p>  <!-- Darker than before -->
+                                    <p class="text-sm text-gray-100">{value}</p>  <!-- Brighter for contrast -->
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="w-[60vw] overflow-x-auto rounded-lg shadow-lg p-4">
