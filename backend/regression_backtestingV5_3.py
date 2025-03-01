@@ -339,6 +339,7 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
             ps_table[portfolio_name[p]] = col_data
     
     print("Performance Summary")
+
     # print(ps_table)
 
     # Portfolio Growth Plot
@@ -428,10 +429,10 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
     # Create a list of portfolio labels for the active portfolios
     active_portfolio_names = [portfolio_name[p] for p in range(4) if ind_alloc[p] == 1]
 
-
-    for i, portfolio_name in enumerate(active_portfolio_names):
+    # print(active_portfolio_names, "kjvndkfnvdk")
+    for i, portfolio in enumerate(active_portfolio_names):
         dataset = {
-            "label": portfolio_name,  # Portfolio name
+            "label": portfolio,  # Portfolio name
             "data": [round(float(value) * 100, 2) if not np.isnan(value) else None for value in y_values[:, i]],
             "backgroundColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 0.6)",
             "borderColor": f"rgba({100 + i * 30}, {150 - i * 20}, {200 + i * 20}, 1)",
@@ -465,12 +466,13 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
 
 
     # Drawdown Plot
-    # plt.figure(figsize=(12, 4))
-    # for p in range(4):
-    #     if ind_alloc[p] == 1:
-    #         plt.plot(output[p]['dates_aux'], output[p]['drawdowns'] * 100, label=portfolio_name[p], linewidth=1.5)
-    # plt.title('Drawdowns')
-    # plt.legend()
+    plt.figure(figsize=(12, 4))
+    print(portfolio_name, "lfmvkdfn ")
+    for p in range(4):
+        if ind_alloc[p] == 1:
+            plt.plot(output[p]['dates_aux'], output[p]['drawdowns'] * 100, label=portfolio_name[p], linewidth=1.5)
+    plt.title('Drawdowns')
+    plt.legend()
     # plt.show()
 
 
@@ -490,8 +492,8 @@ def backtesting(start_date, end_date, tickers, allocation1, allocation2, allocat
             drawdown_data["portfolios"][portfolio_name[p]] = [round(float(value), 2) for value in drawdowns]
             plt.plot(output[p]['dates_aux'], output[p]['drawdowns'] * 100, label=portfolio_name[p], linewidth=1.5)
 
-    plt.title('Drawdowns')
-    plt.legend()
+    # plt.title('Drawdowns')
+    # plt.legend()
     # plt.show()
 
     # print(drawdown_data)

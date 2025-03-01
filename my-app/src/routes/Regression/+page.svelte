@@ -148,8 +148,11 @@
                 results.line4?.[0] ?? {}, 
                 results.line5?.[0] ?? {}, 
                 results.line6?.[0] ?? {}
+
+                
     
             );
+            console.log(summary)
             })
 
 
@@ -266,7 +269,7 @@
         });
     })
 
-
+    
 
 </script>
 
@@ -332,34 +335,80 @@
     <div class="w-screen items-center">
         <h1 class="text-xl text-center">OLS Regression Results</h1>
         <div class="flex flex-col items-center">
-            <!-- <div class="w-[60vw] text-gray-100 p-8">
-                <div class="max-w-7xl mx-auto">
-                  <div class="grid grid-cols-4 gap-4 mb-12">
-                    {#each Object.entries(summary) as [key, value]}
-                      <div class="bg-[#242627] rounded-lg shadow-lg p-4 flex justify-between items-center">
-                        <p class="text-xs text-gray-400">{key}</p>
-                        <p class="text-xs text-[#C0C0C0]">{value}</p>
-                      </div>
-                    {/each}
-                  </div>
-              
-                  
-                </div>
-            </div> -->
+           
             <div class="flex flex-col items-center mb-[5vh]">
-                <div class="w-[60vw] text-gray-200 p-8 rounded-lg shadow-lg font-mono">
+                <div class="w-[60vw] text-gray- p-8 rounded-lg shadow-lg font-mono">
                     <div class="max-w-4xl mx-auto">
-                        <div class="grid grid-cols-2 gap-2 mb-4">
-                            {#each Object.entries(summary) as [key, value]}
-                                <div class="flex justify-between border-b border-gray-600 py-1">
-                                    <p class="text-sm text-gray-300">{key}:</p>  <!-- Darker than before -->
-                                    <p class="text-sm text-gray-100">{value}</p>  <!-- Brighter for contrast -->
-                                </div>
-                            {/each}
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Dep. Variable:</p>
+                                <p class="text-sm text-gray-800">{summary["Dep. Variable"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">R-squared:</p>
+                                <p class="text-sm text-gray-800">{summary["R-squared"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Model:</p>
+                                <p class="text-sm text-gray-800">{summary["Model"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Adj. R-squared:</p>
+                                <p class="text-sm text-gray-800">{summary["Adj. R-squared"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Method:</p>
+                                <p class="text-sm text-gray-800">{summary["Method"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">F-statistic:</p>
+                                <p class="text-sm text-gray-800">{summary["F-statistic"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Date:</p>
+                                <p class="text-sm text-gray-800">{summary["date"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Prob (F-statistic):</p>
+                                <p class="text-sm text-gray-800">{summary["Prob (F-statistic)"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Time:</p>
+                                <p class="text-sm text-gray-800">{summary["time"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Log-Likelihood:</p>
+                                <p class="text-sm text-gray-800">{summary["Log-Likelihood"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">No. Observations:</p>
+                                <p class="text-sm text-gray-800">{summary["No. Observations"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">AIC:</p>
+                                <p class="text-sm text-gray-800">{summary["AIC"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Df Residuals:</p>
+                                <p class="text-sm text-gray-800">{summary["Df Residuals"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">BIC:</p>
+                                <p class="text-sm text-gray-800">{summary["BIC"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Df Model:</p>
+                                <p class="text-sm text-gray-800">{summary["Df Model"]}</p> 
+                            </div>
+                            <div class="flex justify-between border-b border-gray-600 py-1">
+                                <p class="text-sm text-gray-600">Covariance Type:</p>
+                                <p class="text-sm text-gray-800">{summary["Covariance Type"]}</p> 
+                            </div>                            
                         </div>
                     </div>
                 </div>
             </div>
+            
             <div class="w-[60vw] overflow-x-auto rounded-lg shadow-lg p-4">
                 <table class="w-full">
                   <thead>

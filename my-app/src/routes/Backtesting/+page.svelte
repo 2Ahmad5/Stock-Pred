@@ -298,130 +298,129 @@
     function updateChart(portfolio_growths, annual_returns_data, drawdown_chart) {
 
 
+        const colorPalette = [
+            "#0072BD", // Blue
+            "#D95319", // Orange
+            "#EDB120", // Yellow
+            "#7E2F8E", // Purple
+            "#77AC30", // Green
+            "#4DBEEE", // Light Blue
+            "#A2142F", // Red
+            "#9467BD", // Dark Purple
+            "#8C564B", // Brown
+            "#E377C2"  // Pink (NEW)
+        ];
+
+
+        // Store assigned colors dynamically
+        const portfolioColorMap = {};
+
+        // Function to get a consistent color for each portfolio
+        const getColor = (portfolio) => {
+            if (!portfolioColorMap[portfolio]) {
+                const availableColors = colorPalette.filter(color => !Object.values(portfolioColorMap).includes(color));
+                portfolioColorMap[portfolio] = availableColors.length > 0 ? availableColors[0] : "#000000"; // Default to black if exceeded 9
+            }
+            return portfolioColorMap[portfolio];
+        };
+
+        // Select chart contexts
         const gchartx = document.querySelector('.growth-chart').getContext('2d');
         const achartx = document.querySelector('.annual-returns-chart').getContext('2d');
         const dchartx = document.querySelector('.drawdown-chart').getContext('2d');
 
-        if(growthChart){
-            growthChart.destroy();
-        }
-        if(anreturnsChart){
-            anreturnsChart.destroy();
-        }
-        if(drawdownChart){
-            drawdownChart.destroy();
-        }
-        
+        // Destroy existing charts if they exist
+        if (growthChart) growthChart.destroy();
+        if (anreturnsChart) anreturnsChart.destroy();
+        if (drawdownChart) drawdownChart.destroy();
 
-        const labels = portfolio_growths[Object.keys(portfolio_growths)[0]][0]; // Use x-values from the first portfolio for labels
+        // Labels (X-values) for Growth Chart
+        const labels = portfolio_growths[Object.keys(portfolio_growths)[0]][0];
 
-        const gdatasets = Object.keys(portfolio_growths).map((portfolio, index) => {
-            const xValues = portfolio_growths[portfolio][0]; // Dates or x-values
+        // Prepare Growth Chart datasets with consistent colors
+        const gdatasets = Object.keys(portfolio_growths).map(portfolio => {
             const yValues = portfolio_growths[portfolio][1]; // Growth or y-values
+            const color = getColor(portfolio);
 
             return {
                 label: portfolio,
                 data: yValues,
-                backgroundColor: `rgba(${100 + index * 30}, ${150 - index * 20}, ${200 + index * 20}, 0.6)`,
-                borderColor: `rgba(${100 + index * 30}, ${150 - index * 20}, ${200 + index * 20}, 1)`,
+                backgroundColor: `${color}60`, // 60% opacity
+                borderColor: color,
                 borderWidth: 1
             };
         });
 
+        // Create Growth Chart
         growthChart = new Chart(gchartx, {
             type: 'line',
-            data: {
-                labels: labels, 
-                datasets: gdatasets 
-            },
+            data: { labels: labels, datasets: gdatasets },
             options: {
                 responsive: true,
                 scales: {
                     x: {
                         type: 'time',
-                        time: {
-                            unit: 'year',
-                            displayFormats: {
-                                year: 'yyyy'
-                            }
-                        }
+                        time: { unit: 'year', displayFormats: { year: 'yyyy' } }
                     },
-                    y: {
-                        beginAtZero: true,
-                        type: 'linear'
-                    }
+                    y: { beginAtZero: true, type: 'linear' }
                 }
             }
         });
 
+        // Prepare Annual Returns Chart datasets with consistent colors
+        const ar_datasets = annual_returns_data['datasets'].map(dataset => {
+            const color = getColor(dataset.label);
+            return { ...dataset, backgroundColor: color, borderColor: color };
+        });
+
+        // Create Annual Returns Chart
         anreturnsChart = new Chart(achartx, {
             type: 'bar',
             data: {
                 labels: annual_returns_data['labels'].map(year => `${year}-01-01`),
-                datasets: annual_returns_data['datasets'],
+                datasets: ar_datasets
             },
             options: {
                 responsive: true,
                 scales: {
                     x: {
                         type: 'time',
-                        time: {
-                            unit: 'year',
-                            displayFormats: {
-                                year: 'yyyy'
-                            }
-                        }
+                        time: { unit: 'year', displayFormats: { year: 'yyyy' } }
                     },
-                    y: {
-                        beginAtZero: true,
-                        type: 'linear',
-                        
-                    }
+                    y: { beginAtZero: true, type: 'linear' }
                 }
             }
         });
 
-        const ddatasets = Object.keys(drawdown_chart['portfolios']).map((portfolio, index) => {
-            const yValues = drawdown_chart['portfolios'][portfolio]; // Growth or y-values
+        // Prepare Drawdown Chart datasets with consistent colors
+        const ddatasets = Object.keys(drawdown_chart['portfolios']).map(portfolio => {
+            const yValues = drawdown_chart['portfolios'][portfolio];
+            const color = getColor(portfolio);
 
             return {
                 label: portfolio,
                 data: yValues,
-                backgroundColor: `rgba(${100 + index * 30}, ${150 - index * 20}, ${200 + index * 20}, 0.6)`,
-                borderColor: `rgba(${100 + index * 30}, ${150 - index * 20}, ${200 + index * 20}, 1)`,
+                backgroundColor: `${color}60`, // 60% opacity
+                borderColor: color,
                 borderWidth: 1
             };
         });
 
+        // Create Drawdown Chart
         drawdownChart = new Chart(dchartx, {
             type: 'line',
-            data: {
-                labels: drawdown_chart['dates'],
-                datasets: ddatasets
-            },
+            data: { labels: drawdown_chart['dates'], datasets: ddatasets },
             options: {
                 responsive: true,
                 scales: {
                     x: {
                         type: 'time',
-                        time: {
-                            unit: 'year',
-                            displayFormats: {
-                                year: 'yyyy'
-                            }
-                        }
+                        time: { unit: 'year', displayFormats: { year: 'yyyy' } }
                     },
-                    y: {
-                        beginAtZero: true,
-                        type: 'linear'
-                    }
+                    y: { beginAtZero: true, type: 'linear' }
                 }
             }
         });
-        
-        
-        
-
 
 
     }
@@ -678,10 +677,8 @@
     gap: 24px;
     margin: 0 auto;
     /* width: fit-content; */
-    /* box-shadow: 0 4px 12px -2px rgba(255, 255, 255, .3); */
+    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3);
     border-radius: 20px;
-    border-width: 2px;
-    border-color: #2b3135;
     padding: 8px 32px;
     transition: all 400ms ease;
     /* background-color: #2e3233; */

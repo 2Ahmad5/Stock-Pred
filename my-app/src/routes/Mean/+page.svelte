@@ -52,6 +52,8 @@
     let endDate = '';
     let constraint = '';
 
+
+
     onMount(async () => {
         const db = await openDB('csvStore', 1, {
         upgrade(db) {
@@ -294,34 +296,47 @@
         const labels = items;
         const dataPoints = dough;
         const comboPoints = combo;
-        const colors = labels.map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`); // Generates random colors
+        const colorPalette = [
+            "#0072BD", // Blue
+            "#D95319", // Orange
+            "#EDB120", // Yellow
+            "#7E2F8E", // Purple
+            "#77AC30", // Green
+            "#4DBEEE", // Light Blue
+            "#A2142F", // Red
+            "#9467BD",
+            "#8C564B"
+        ];
  
+        const stockColorMap = {};
+
+        const getColor = (stock) => {
+            if (!stockColorMap[stock]) {
+                const availableColors = colorPalette.filter(color => !Object.values(stockColorMap).includes(color));
+                stockColorMap[stock] = availableColors.length > 0 ? availableColors[0] : "#000000"; // Default to black if exceeded 9
+            }
+            return stockColorMap[stock];
+        };
+
+        const colors = labels.map(stock => getColor(stock));
 
         const fillPoints = fill.map((dataset, i) => {
             const color = colors[i];
-            const rgbaColor = `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`; 
             return {
                 ...dataset,
-                backgroundColor: rgbaColor,
-                borderColor: color, 
+                backgroundColor: `rgba(${parseInt(color.slice(1, 3), 16)}, ${parseInt(color.slice(3, 5), 16)}, ${parseInt(color.slice(5, 7), 16)}, 0.5)`,
+                borderColor: color,
                 fill: true
             };
         });
 
+        // Apply to scatterPoints
         const scatterPoints = scatter.map((dataset, i) => {
             const color = colors[i];
-            if(i == scatter.length - 1){
-                return{
-                    ...dataset,
-                    backgroundColor: 'red',
-                    borderColor: 'red', 
-                }
-            }
             return {
                 ...dataset,
-                backgroundColor: color,
-                borderColor: color, 
-               
+                backgroundColor: i === scatter.length - 1 ? 'red' : color,
+                borderColor: i === scatter.length - 1 ? 'red' : color
             };
         });
 
@@ -487,7 +502,7 @@
                 }]
             },
             options: {
-                borderWidth: 5,
+                borderWidth: 2,
                 borderRadius: 2,
                 hoverBorderWidth: 0,
                 plugins: {
@@ -495,7 +510,7 @@
                         display: true,
                         position: 'top',
                         labels: {
-                        boxWidth: 10,
+                        boxWidth: 5,
                         padding: 3
                     }
                 }
